@@ -1,0 +1,28 @@
+{
+  "name": "coffeecode/router",
+  "description": "A classic CoffeeCode Router is easy, fast and extremely uncomplicated. Create and manage your routes in minutes!",
+  "keywords": [
+    "CoffeeCode",
+    "UpInside",
+    "Router",
+    "Route",
+    "Routes"
+  ],
+  "homepage": "http://www.upinside.com.br",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Robson V. Leite",
+      "email": "cursos@upinside.com.br",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": "^7.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "CoffeeCode\\Router\\": "src"
+    }
+  }
+}
