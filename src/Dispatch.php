@@ -52,7 +52,6 @@ abstract class Dispatch
     /** @const int Not Implemented */
     public const NOT_IMPLEMENTED = 501;
 
-
     /**
      * Dispatch constructor.
      *
@@ -136,6 +135,14 @@ abstract class Dispatch
             }
         }
 
+        return $this->route();
+    }
+
+    /**
+     * @return bool
+     */
+    private function route()
+    {
         if ($this->route) {
             if (is_callable($this->route['handler'])) {
                 call_user_func($this->route['handler'], ($this->route['data'] ?? []));
@@ -181,17 +188,15 @@ abstract class Dispatch
             $this->data[$key[1]] = ($routeDiff[$offset++] ?? null);
         }
 
-        (!$this->group ?: $route = "/{$this->group}{$route}");
-
+        $route = (!$this->group ?: "/{$this->group}{$route}");
         $data = $this->data;
         $namespace = $this->namespace;
         $router = function () use ($method, $handler, $data, $route, $namespace) {
             return [
                 "route" => $route,
                 "method" => $method,
-                "handler" => (!is_string($handler) ? $handler : "{$namespace}\\" . explode($this->separator,
-                        $handler)[0]),
-                "action" => (!is_string($handler) ?: (explode($this->separator, $handler)[1] ?? null)),
+                "handler" => $this->handler($handler, $namespace),
+                "action" => $this->action($handler),
                 "data" => $data
             ];
         };
@@ -223,14 +228,7 @@ abstract class Dispatch
             return;
         }
 
-        if ($this->httpMethod == "GET") {
-            $this->data = [];
-
-            unset($this->data["_method"]);
-            return;
-        }
-
-        if (in_array($this->httpMethod, ["PUT", "PATCH"]) && !empty($_SERVER['CONTENT_LENGTH'])) {
+        if (in_array($this->httpMethod, ["PUT", "PATCH", "DELETE"]) && !empty($_SERVER['CONTENT_LENGTH'])) {
             parse_str(file_get_contents('php://input', false, null, 0, $_SERVER['CONTENT_LENGTH']), $putPatch);
             $this->data = $putPatch;
 
@@ -240,5 +238,24 @@ abstract class Dispatch
 
         $this->data = [];
         return;
+    }
+
+    /**
+     * @param $handler
+     * @param $namespace
+     * @return string
+     */
+    private function handler($handler, $namespace): string
+    {
+        return (!is_string($handler) ? $handler : "{$namespace}\\" . explode($this->separator, $handler)[0]);
+    }
+
+    /**
+     * @param $handler
+     * @return null|string
+     */
+    private function action($handler): ?string
+    {
+        return (!is_string($handler) ?: (explode($this->separator, $handler)[1] ?? null));
     }
 }
