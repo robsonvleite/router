@@ -47,6 +47,31 @@ composer require coffeecode/router
 
 Para mais detalhes sobre como usar o router, veja a pasta de exemplo com detalhes no diretório do componente
 
+##### RewriteEngine
+
+###### To use the router you need to redirect your route routing navigation (index.php) where all traffic must be handled. The example below shows how
+
+Para usar o router é preciso redirecionar sua navegação para o arquivo raiz de rotas (index.php) onde todo o tráfego deve ser tratado. O exemplo abaixo mostra como
+
+```apacheconfig
+RewriteEngine On
+Options All -Indexes
+
+# ROUTER WWW Redirect.
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ROUTER HTTPS Redirect
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ROUTER URL Rewrite
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?route=/$1
+```
+
 ##### Routes
 
 ```php
