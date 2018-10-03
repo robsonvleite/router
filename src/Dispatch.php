@@ -188,7 +188,7 @@ abstract class Dispatch
             $this->data[$key[1]] = ($routeDiff[$offset++] ?? null);
         }
 
-        $route = (!$this->group ?: "/{$this->group}{$route}");
+        $route = (!$this->group ? $route : "/{$this->group}{$route}");
         $data = $this->data;
         $namespace = $this->namespace;
         $router = function () use ($method, $handler, $data, $route, $namespace) {
@@ -243,9 +243,9 @@ abstract class Dispatch
     /**
      * @param $handler
      * @param $namespace
-     * @return string
+     * @return string|callable
      */
-    private function handler($handler, $namespace): string
+    private function handler($handler, $namespace)
     {
         return (!is_string($handler) ? $handler : "{$namespace}\\" . explode($this->separator, $handler)[0]);
     }
