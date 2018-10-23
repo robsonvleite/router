@@ -179,6 +179,10 @@ abstract class Dispatch
      */
     protected function addRoute(string $method, string $route, $handler): Dispatch
     {
+        if ($route == "/") {
+            $this->addRoute($method, "", $handler);
+        }
+
         preg_match_all("~\{\s* ([a-zA-Z_][a-zA-Z0-9_-]*) \}~x", $route, $keys, PREG_SET_ORDER);
         $routeDiff = array_values(array_diff(explode("/", $this->patch), explode("/", $route)));
 
