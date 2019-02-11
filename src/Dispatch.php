@@ -61,7 +61,7 @@ abstract class Dispatch
     public function __construct(string $projectUrl, ?string $separator = ":")
     {
         $this->projectUrl = (substr($projectUrl, "-1") == "/" ? substr($projectUrl, 0, -1) : $projectUrl);
-        $this->patch = (filter_input(INPUT_GET, "route", FILTER_SANITIZE_STRIPPED) ?? "/");
+        $this->patch = (filter_input(INPUT_GET, "route", FILTER_DEFAULT) ?? "/");
         $this->separator = ($separator ?? ":");
         $this->httpMethod = $_SERVER['REQUEST_METHOD'];
     }
@@ -215,7 +215,7 @@ abstract class Dispatch
      */
     protected function formSpoofing(): void
     {
-        $post = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
+        $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 
         if (!empty($post['_method']) && in_array($post['_method'], ["PUT", "PATCH", "DELETE"])) {
             $this->httpMethod = $post['_method'];
@@ -226,7 +226,7 @@ abstract class Dispatch
         }
 
         if ($this->httpMethod == "POST") {
-            $this->data = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
+            $this->data = filter_input_array(INPUT_POST, FILTER_DEFAULT);
 
             unset($this->data["_method"]);
             return;
