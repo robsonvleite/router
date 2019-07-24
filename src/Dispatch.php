@@ -116,6 +116,7 @@ abstract class Dispatch
     public function redirect(string $route): void
     {
         header("Location: {$this->projectUrl}{$route}");
+        exit;
     }
 
     /**
