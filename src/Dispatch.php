@@ -111,10 +111,39 @@ abstract class Dispatch
     }
 
     /**
+     * @param string $name
+     * @return string|null
+     */
+    public function route(string $name): ?string
+    {
+        foreach ($this->routes as $http_verb) {
+            foreach ($http_verb as $route_item) {
+                if (!empty($route_item["name"]) && $route_item["name"] == $name) {
+                    $route = $route_item["route"];
+                    return "{$this->projectUrl}{$route}";
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * @param string $route
      */
     public function redirect(string $route): void
     {
+        foreach ($this->routes as $http_verb) {
+            foreach ($http_verb as $route_item) {
+                if ($route_item["name"] == $route) {
+                    $route = $route_item["route"];
+                    header("Location: {$this->projectUrl}{$route}");
+                    exit;
+                }
+            }
+        }
+
+        $route = (substr($route, 0, 1) == "/" ? $route : "/{$route}");
         header("Location: {$this->projectUrl}{$route}");
         exit;
     }
@@ -136,13 +165,13 @@ abstract class Dispatch
             }
         }
 
-        return $this->route();
+        return $this->execute();
     }
 
     /**
      * @return bool
      */
-    private function route()
+    private function execute()
     {
         if ($this->route) {
             if (is_callable($this->route['handler'])) {
@@ -154,7 +183,7 @@ abstract class Dispatch
             $method = $this->route['action'];
 
             if (class_exists($controller)) {
-                $newController = new $controller;
+                $newController = new $controller($this);
                 if (method_exists($controller, $method)) {
                     $newController->$method(($this->route['data'] ?? []));
                     return true;
@@ -176,12 +205,13 @@ abstract class Dispatch
      * @param string $method
      * @param string $route
      * @param string|callable $handler
+     * @param null|string
      * @return Dispatch
      */
-    protected function addRoute(string $method, string $route, $handler): Dispatch
+    protected function addRoute(string $method, string $route, $handler, string $name = null): Dispatch
     {
         if ($route == "/") {
-            $this->addRoute($method, "", $handler);
+            $this->addRoute($method, "", $handler, $name);
         }
 
         preg_match_all("~\{\s* ([a-zA-Z_][a-zA-Z0-9_-]*) \}~x", $route, $keys, PREG_SET_ORDER);
@@ -196,9 +226,10 @@ abstract class Dispatch
         $route = (!$this->group ? $route : "/{$this->group}{$route}");
         $data = $this->data;
         $namespace = $this->namespace;
-        $router = function () use ($method, $handler, $data, $route, $namespace) {
+        $router = function () use ($method, $handler, $data, $route, $name, $namespace) {
             return [
                 "route" => $route,
+                "name" => $name,
                 "method" => $method,
                 "handler" => $this->handler($handler, $namespace),
                 "action" => $this->action($handler),

@@ -119,6 +119,39 @@ if ($router->error()) {
 }
 ```
 
+##### Named
+
+```php
+<?php
+require __DIR__ . "/../vendor/autoload.php";
+
+use CoffeeCode\Router\Router;
+
+$router = new Router("https://www.youdomain.com");
+
+/**
+ * routes
+ * The controller must be in the namespace Test\Controller
+ */
+$router->namespace("Test")->group("name");
+
+$router->get("/", "Name:home", "name.home");
+$router->get("/hello", "Name:hello", "name.hello");
+$router->get("/redirect", "Name:redirect", "name.redirect");
+
+/**
+ * This method executes the routes
+ */
+$router->dispatch();
+
+/*
+ * Redirect all errors
+ */
+if ($router->error()) {
+    $router->redirect("name.hello");
+}
+```
+
 ##### Callable
 
 ```php
@@ -163,6 +196,31 @@ $router->delete("/", function ($data) {
 });
 
 $router->dispatch();
+```
+
+##### Controller
+
+```php
+class Name
+{
+    public function __construct($router)
+    {
+        $this->router = $router;
+    }
+
+    public function home(): void
+    {
+        echo "<h1>Home</h1>";
+        echo "<p>", $this->router->route("name.home"), "</p>";
+        echo "<p>", $this->router->route("name.hello"), "</p>";
+        echo "<p>", $this->router->route("name.redirect"), "</p>";
+    }
+
+    public function redirect(): void
+    {
+        $this->router->redirect("name.hello");
+    }
+}
 ```
 
 ##### Form Spoofing

@@ -2,6 +2,7 @@
 
 require __DIR__ . "/../../vendor/autoload.php";
 require __DIR__ . "/Test/Coffee.php";
+require __DIR__ . "/Test/Name.php";
 
 use CoffeeCode\Router\Router;
 
@@ -20,12 +21,21 @@ $router->post("/edit/{id}", "Coffee:edit");
 /**
  * group by routes and namespace
  */
-$router->group("admin")->namespace("Test");
+$router->group("admin");
 
 $router->get("/", "Coffee:admin");
 $router->get("/user/{id}", "Coffee:admin");
 $router->get("/user/{id}/profile", "Coffee:admin");
 $router->get("/user/{id}/profile/{photo}", "Coffee:admin");
+
+/**
+ * named routes
+ */
+$router->group("name");
+
+$router->get("/", "Name:home", "name.home");
+$router->get("/hello", "Name:hello", "name.hello");
+$router->get("/redirect", "Name:redirect", "name.redirect");
 
 /**
  * Group Error
@@ -40,5 +50,6 @@ $router->get("/{errcode}", "Coffee:notFound");
 $router->dispatch();
 
 if ($router->error()) {
-    $router->redirect("/error/{$router->error()}");
+    var_dump($router->error());
+    //router->redirect("/error/{$router->error()}");
 }

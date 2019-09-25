@@ -23,46 +23,51 @@ class Router extends Dispatch
 
     /**
      * @param string $route
-     * @param string|callable $handler
+     * @param $handler
+     * @param string|null $name
      */
-    public function post(string $route, $handler): void
+    public function post(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("POST", $route, $handler);
+        $this->addRoute("POST", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param string|callable $handler
+     * @param $handler
+     * @param string|null $name
      */
-    public function get(string $route, $handler): void
+    public function get(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("GET", $route, $handler);
+        $this->addRoute("GET", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param string|callable $handler
+     * @param $handler
+     * @param string|null $name
      */
-    public function put(string $route, $handler): void
+    public function put(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("PUT", $route, $handler);
+        $this->addRoute("PUT", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param string|callable $handler
+     * @param $handler
+     * @param string|null $name
      */
-    public function patch(string $route, $handler): void
+    public function patch(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("PATCH", $route, $handler);
+        $this->addRoute("PATCH", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param string|callable $handler
+     * @param $handler
+     * @param string|null $name
      */
-    public function delete(string $route, $handler): void
+    public function delete(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("DELETE", $route, $handler);
+        $this->addRoute("DELETE", $route, $handler, $name);
     }
 }
