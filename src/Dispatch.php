@@ -112,7 +112,7 @@ abstract class Dispatch
 
     /**
      * @param string $name
-     * @param array $data
+     * @param array|null $data
      * @return string|null
      */
     public function route(string $name, array $data = null): ?string
@@ -128,7 +128,7 @@ abstract class Dispatch
     /**
      * @param string $name
      * @param array $route_item
-     * @param array $data
+     * @param array|null $data
      * @return string|null
      */
     private function treat(string $name, array $route_item, array $data = null): ?string
@@ -137,24 +137,35 @@ abstract class Dispatch
             $route = $route_item["route"];
             if (!empty($data)) {
                 $arguments = [];
+                $params = [];
                 foreach ($data as $key => $value) {
                     if (!strstr($route, "{{$key}}")) {
                         $params[$key] = $value;
                     }
                     $arguments["{{$key}}"] = $value;
                 }
-                $params = (!empty($params) ? "?" . http_build_query($params) : null);
-                $route = str_replace(array_keys($arguments), array_values($arguments), $route) . "{$params}";
+                $route = $this->process($route, $arguments, $params);
             }
             return "{$this->projectUrl}{$route}";
         }
-
         return null;
     }
 
     /**
      * @param string $route
-     * @param array $data
+     * @param array $arguments
+     * @param array|null $params
+     * @return string
+     */
+    private function process(string $route, array $arguments, array $params = null): string
+    {
+        $params = (!empty($params) ? "?" . http_build_query($params) : null);
+        return str_replace(array_keys($arguments), array_values($arguments), $route) . "{$params}";
+    }
+
+    /**
+     * @param string $route
+     * @param array|null $data
      */
     public function redirect(string $route, array $data = null): void
     {
