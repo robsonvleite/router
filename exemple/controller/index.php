@@ -35,9 +35,10 @@ $router->group("name");
 
 $router->get("/", "Name:home", "name.home");
 $router->get("/hello", "Name:hello", "name.hello");
-$router->get("/redirect", "Name:redirect", "name.redirect");
 
+$router->get("/redirect", "Name:redirect", "name.redirect");
 $router->get("/redirect/{category}/{page}", "Name:redirect", "name.redirect");
+
 $router->get("/params/{category}/page/{page}", "Name:params", "name.params");
 
 /**

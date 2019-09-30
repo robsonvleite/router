@@ -22,7 +22,9 @@ trait RouterTrait
     {
         foreach ($this->routes as $http_verb) {
             foreach ($http_verb as $route_item) {
-                return $this->treat($name, $route_item, $data);
+                if (!empty($route_item["name"]) && $route_item["name"] == $name) {
+                    return $this->treat($route_item, $data);
+                }
             }
         }
         return null;
@@ -54,9 +56,8 @@ trait RouterTrait
      * @param string $route
      * @param string|callable $handler
      * @param null|string
-     * @return Dispatch
      */
-    protected function addRoute(string $method, string $route, $handler, string $name = null): RouterTrait
+    protected function addRoute(string $method, string $route, $handler, string $name = null): void
     {
         if ($route == "/") {
             $this->addRoute($method, "", $handler, $name);
@@ -87,7 +88,6 @@ trait RouterTrait
 
         $route = preg_replace('~{([^}]*)}~', "([^/]+)", $route);
         $this->routes[$method][$route] = $router();
-        return $this;
     }
 
     /**
@@ -110,29 +110,26 @@ trait RouterTrait
     }
 
     /**
-     * @param string $name
      * @param array $route_item
      * @param array|null $data
      * @return string|null
      */
-    private function treat(string $name, array $route_item, array $data = null): ?string
+    private function treat(array $route_item, array $data = null): ?string
     {
-        if (!empty($route_item["name"]) && $route_item["name"] == $name) {
-            $route = $route_item["route"];
-            if (!empty($data)) {
-                $arguments = [];
-                $params = [];
-                foreach ($data as $key => $value) {
-                    if (!strstr($route, "{{$key}}")) {
-                        $params[$key] = $value;
-                    }
-                    $arguments["{{$key}}"] = $value;
+        $route = $route_item["route"];
+        if (!empty($data)) {
+            $arguments = [];
+            $params = [];
+            foreach ($data as $key => $value) {
+                if (!strstr($route, "{{$key}}")) {
+                    $params[$key] = $value;
                 }
-                $route = $this->process($route, $arguments, $params);
+                $arguments["{{$key}}"] = $value;
             }
-            return "{$this->projectUrl}{$route}";
+            $route = $this->process($route, $arguments, $params);
         }
-        return null;
+
+        return "{$this->projectUrl}{$route}";
     }
 
     /**
