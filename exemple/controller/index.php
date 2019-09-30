@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__ . "/../../vendor/autoload.php";
+require dirname(__DIR__, 2) . "/vendor/autoload.php";
 require __DIR__ . "/Test/Coffee.php";
 require __DIR__ . "/Test/Name.php";
 
@@ -32,13 +32,11 @@ $router->get("/user/{id}/profile/{photo}", "Coffee:admin");
  * named routes
  */
 $router->group("name");
-
 $router->get("/", "Name:home", "name.home");
 $router->get("/hello", "Name:hello", "name.hello");
 
 $router->get("/redirect", "Name:redirect", "name.redirect");
 $router->get("/redirect/{category}/{page}", "Name:redirect", "name.redirect");
-
 $router->get("/params/{category}/page/{page}", "Name:params", "name.params");
 
 /**
@@ -46,7 +44,6 @@ $router->get("/params/{category}/page/{page}", "Name:params", "name.params");
  */
 $router->group("error")->namespace("Test");
 $router->get("/{errcode}", "Coffee:notFound");
-
 
 /**
  * execute
