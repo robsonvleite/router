@@ -112,7 +112,7 @@ abstract class Dispatch
 
     /**
      * @param string $name
-     * @param $data
+     * @param array $data
      * @return string|null
      */
     public function route(string $name, array $data = null): ?string
@@ -131,11 +131,11 @@ abstract class Dispatch
      * @param array $data
      * @return string|null
      */
-    private function treat(string $name, array $route_item, array $data): ?string
+    private function treat(string $name, array $route_item, array $data = null): ?string
     {
         if (!empty($route_item["name"]) && $route_item["name"] == $name) {
             $route = $route_item["route"];
-            if ($data) {
+            if (!empty($data)) {
                 $arguments = [];
                 foreach ($data as $key => $value) {
                     if (!strstr($route, "{{$key}}")) {
