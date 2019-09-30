@@ -119,23 +119,36 @@ abstract class Dispatch
     {
         foreach ($this->routes as $http_verb) {
             foreach ($http_verb as $route_item) {
-                if (!empty($route_item["name"]) && $route_item["name"] == $name) {
-                    $route = $route_item["route"];
-                    if ($data) {
-                        $arguments = [];
-                        foreach ($data as $key => $value) {
-                            if (!strstr($route, "{{$key}}")) {
-                                $params[$key] = $value;
-                            }
-                            $arguments["{{$key}}"] = $value;
-                        }
-                        $params = (!empty($params) ? "?" . http_build_query($params) : null);
-                        $route = str_replace(array_keys($arguments), array_values($arguments), $route) . "{$params}";
-                    }
-                    return "{$this->projectUrl}{$route}";
-                }
+                $this->treat($name, $route_item, $data);
             }
         }
+        return null;
+    }
+
+    /**
+     * @param string $name
+     * @param array $route_item
+     * @param array $data
+     * @return string|null
+     */
+    private function treat(string $name, array $route_item, array $data): ?string
+    {
+        if (!empty($route_item["name"]) && $route_item["name"] == $name) {
+            $route = $route_item["route"];
+            if ($data) {
+                $arguments = [];
+                foreach ($data as $key => $value) {
+                    if (!strstr($route, "{{$key}}")) {
+                        $params[$key] = $value;
+                    }
+                    $arguments["{{$key}}"] = $value;
+                }
+                $params = (!empty($params) ? "?" . http_build_query($params) : null);
+                $route = str_replace(array_keys($arguments), array_values($arguments), $route) . "{$params}";
+            }
+            return "{$this->projectUrl}{$route}";
+        }
+
         return null;
     }
 
