@@ -119,7 +119,7 @@ abstract class Dispatch
     {
         foreach ($this->routes as $http_verb) {
             foreach ($http_verb as $route_item) {
-                $this->treat($name, $route_item, $data);
+                return $this->treat($name, $route_item, $data);
             }
         }
         return null;
@@ -169,8 +169,7 @@ abstract class Dispatch
      */
     public function redirect(string $route, array $data = null): void
     {
-        $name = $this->route($route, $data);
-        if (!empty($name)) {
+        if ($name = $this->route($route, $data)) {
             header("Location: {$name}");
             exit;
         }
