@@ -112,35 +112,47 @@ abstract class Dispatch
 
     /**
      * @param string $name
+     * @param $data
      * @return string|null
      */
-    public function route(string $name): ?string
+    public function route(string $name, array $data = null): ?string
     {
         foreach ($this->routes as $http_verb) {
             foreach ($http_verb as $route_item) {
                 if (!empty($route_item["name"]) && $route_item["name"] == $name) {
                     $route = $route_item["route"];
+                    if ($data) {
+                        $arguments = [];
+                        foreach ($data as $key => $value) {
+                            if (!strstr($route, "{{$key}}")) {
+                                $params[$key] = $value;
+                            }
+                            $arguments["{{$key}}"] = $value;
+                        }
+                        $params = (!empty($params) ? "?" . http_build_query($params) : null);
+                        $route = str_replace(array_keys($arguments), array_values($arguments), $route) . "{$params}";
+                    }
                     return "{$this->projectUrl}{$route}";
                 }
             }
         }
-
         return null;
     }
 
     /**
      * @param string $route
+     * @param array $data
      */
-    public function redirect(string $route): void
+    public function redirect(string $route, array $data = null): void
     {
-        foreach ($this->routes as $http_verb) {
-            foreach ($http_verb as $route_item) {
-                if ($route_item["name"] == $route) {
-                    $route = $route_item["route"];
-                    header("Location: {$this->projectUrl}{$route}");
-                    exit;
-                }
-            }
+        if ($name = $this->route($route, $data)) {
+            header("Location: {$name}");
+            exit;
+        }
+
+        if (filter_var($route, FILTER_VALIDATE_URL)) {
+            header("Location: {$route}");
+            exit;
         }
 
         $route = (substr($route, 0, 1) == "/" ? $route : "/{$route}");

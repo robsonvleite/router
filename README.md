@@ -177,6 +177,33 @@ class Name
 }
 ```
 
+###### Named Params
+````php
+//route
+$router->get("/params/{category}/page/{page}", "Name:params", "name.params");
+
+//$this->route = return URL
+//$this->redirect = redirect URL
+
+$this->router->route("name.params", [
+    "category" => 22,
+    "page" => 2
+]);
+
+//result
+https://www.{}/name/params/22/page/2
+
+$this->router->route("name.params", [
+    "category" => 22,
+    "page" => 2,
+    "argument1" => "most filter",
+    "argument2" => "most search"
+]);
+
+//result
+https://www.{}/name/params/22/page/2?argument1=most+filter&argument2=most+search
+````
+
 ##### Callable
 
 ```php
