@@ -170,7 +170,7 @@ abstract class Dispatch
     public function redirect(string $route, array $data = null): void
     {
         $name = $this->route($route, $data);
-        if ($name) {
+        if (!empty($name)) {
             header("Location: {$name}");
             exit;
         }
