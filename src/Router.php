@@ -22,6 +22,19 @@ class Router extends Dispatch
     }
 
     /**
+     * @param  array $methods
+     * @param string $route
+     * @param $handler
+     * @param string|null $name
+     */
+    public function match(array $methods, string $route, $handler, string $name = null): void
+    {
+        foreach($methods as $method) {
+            $this->addRoute(strtoupper($method), $route, $handler, $name);
+        }
+    }
+
+    /**
      * @param string $route
      * @param $handler
      * @param string|null $name
