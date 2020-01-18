@@ -10,183 +10,194 @@ namespace CoffeeCode\Router;
  */
 abstract class Dispatch
 {
-    use RouterTrait;
+	use RouterTrait;
 
-    /** @var null|array */
-    protected $route;
+	/** @var null|array */
+	protected $route;
 
-    /** @var bool|string */
-    protected $projectUrl;
+	/** @var bool|string */
+	protected $projectUrl;
 
-    /** @var string */
-    protected $separator;
+	/** @var string */
+	protected $separator;
 
-    /** @var null|string */
-    protected $namespace;
+	/** @var null|string */
+	protected $namespace;
 
-    /** @var null|string */
-    protected $group;
+	/** @var null|string */
+	protected $group;
 
-    /** @var null|array */
-    protected $data;
+	/** @var null|array */
+	protected $data;
 
-    /** @var int */
-    protected $error;
+	/** @var int */
+	protected $error;
 
-    /** @const int Bad Request */
-    public const BAD_REQUEST = 400;
+	/** @const int Bad Request */
+	public const BAD_REQUEST = 400;
 
-    /** @const int Not Found */
-    public const NOT_FOUND = 404;
+	/** @const int Not Found */
+	public const NOT_FOUND = 404;
 
-    /** @const int Method Not Allowed */
-    public const METHOD_NOT_ALLOWED = 405;
+	/** @const int Method Not Allowed */
+	public const METHOD_NOT_ALLOWED = 405;
 
-    /** @const int Not Implemented */
-    public const NOT_IMPLEMENTED = 501;
+	/** @const int Not Implemented */
+	public const NOT_IMPLEMENTED = 501;
 
-    /**
-     * Dispatch constructor.
-     *
-     * @param string $projectUrl
-     * @param null|string $separator
-     */
-    public function __construct(string $projectUrl, ?string $separator = ":")
-    {
-        $this->projectUrl = (substr($projectUrl, "-1") == "/" ? substr($projectUrl, 0, -1) : $projectUrl);
-        $this->patch = (filter_input(INPUT_GET, "route", FILTER_DEFAULT) ?? "/");
-        $this->separator = ($separator ?? ":");
-        $this->httpMethod = $_SERVER['REQUEST_METHOD'];
-    }
+	/**
+	 * Dispatch constructor.
+	 *
+	 * @param string $projectUrl
+	 * @param null|string $separator
+	 */
+	public function __construct(string $projectUrl, ?string $separator = ":")
+	{
+		$this->projectUrl = (substr($projectUrl, "-1") == "/" ? substr($projectUrl, 0, -1) : $projectUrl);
+		$this->patch = (filter_input(INPUT_GET, "route", FILTER_DEFAULT) ?? "/");
+		$this->separator = ($separator ?? ":");
+		$this->httpMethod = $_SERVER['REQUEST_METHOD'];
+	}
 
-    /**
-     * @return array
-     */
-    public function __debugInfo()
-    {
-        return $this->routes;
-    }
+	/**
+	 * @return array
+	 */
+	public function __debugInfo()
+	{
+		return $this->routes;
+	}
 
-    /**
-     * @param null|string $namespace
-     * @return Dispatch
-     */
-    public function namespace(?string $namespace): Dispatch
-    {
-        $this->namespace = ($namespace ? ucwords($namespace) : null);
-        return $this;
-    }
+	/**
+	 * @param null|string $namespace
+	 * @return Dispatch
+	 */
+	public function namespace(?string $namespace): Dispatch
+	{
+		$this->namespace = ($namespace ? ucwords($namespace) : null);
+		return $this;
+	}
 
-    /**
-     * @param null|string $group
-     * @return Dispatch
-     */
-    public function group(?string $group): Dispatch
-    {
-        $this->group = ($group ? str_replace("/", "", $group) : null);
-        return $this;
-    }
+	/**
+	 * @param null|string $group
+	 * @return Dispatch
+	 */
+	public function group(?string $group): Dispatch
+	{
+		$this->group = ($group ? str_replace("/", "", $group) : null);
+		return $this;
+	}
 
-    /**
-     * @return null|array
-     */
-    public function data(): ?array
-    {
-        return $this->data;
-    }
+	/**
+	 * @return null|array
+	 */
+	public function data(): ?array
+	{
+		return $this->data;
+	}
 
-    /**
-     * @return null|int
-     */
-    public function error(): ?int
-    {
-        return $this->error;
-    }
+	/**
+	 * @return null|int
+	 */
+	public function error(): ?int
+	{
+		return $this->error;
+	}
 
-    /**
-     * @return bool
-     */
-    public function dispatch(): bool
-    {
-        if (empty($this->routes) || empty($this->routes[$this->httpMethod])) {
-            $this->error = self::NOT_IMPLEMENTED;
-            return false;
-        }
+	/**
+	 * @return bool
+	 */
+	public function dispatch(): bool
+	{
+		if (empty($this->routes) || empty($this->routes[$this->httpMethod])) {
+			$this->error = self::NOT_IMPLEMENTED;
+			return false;
+		}
 
-        $this->route = null;
-        foreach ($this->routes[$this->httpMethod] as $key => $route) {
-            if (preg_match("~^" . $key . "$~", $this->patch, $found)) {
-                $this->route = $route;
-            }
-        }
+		$this->route = null;
+		foreach ($this->routes[$this->httpMethod] as $key => $route) {
+			if (preg_match("~^" . $key . "$~", $this->patch, $found)) {
+				$this->route = $route;
+			}
+		}
 
-        return $this->execute();
-    }
+		return $this->execute();
+	}
 
-    /**
-     * @return bool
-     */
-    private function execute()
-    {
-        if ($this->route) {
-            if (is_callable($this->route['handler'])) {
-                call_user_func($this->route['handler'], ($this->route['data'] ?? []));
-                return true;
-            }
+	/**
+	 * @return bool
+	 */
+	private function execute()
+	{
+		if ($this->route) {
+			if (is_callable($this->route['handler'])) {
+				call_user_func($this->route['handler'], ($this->route['data'] ?? []));
+				return true;
+			}
 
-            $controller = $this->route['handler'];
-            $method = $this->route['action'];
+			$controller = $this->route['handler'];
+			$method = $this->route['action'];
 
-            if (class_exists($controller)) {
-                $newController = new $controller($this);
-                if (method_exists($controller, $method)) {
-                    $newController->$method(($this->route['data'] ?? []));
-                    return true;
-                }
+			if (class_exists($controller)) {
+				$newController = new $controller($this);
+				if (method_exists($controller, $method)) {
+					$newController->$method(($this->route['data'] ?? []));
+					return true;
+				}
 
-                $this->error = self::METHOD_NOT_ALLOWED;
-                return false;
-            }
+				$this->error = self::METHOD_NOT_ALLOWED;
+				return false;
+			}
 
-            $this->error = self::BAD_REQUEST;
-            return false;
-        }
+			$this->error = self::BAD_REQUEST;
+			return false;
+		}
 
-        $this->error = self::NOT_FOUND;
-        return false;
-    }
+		$this->error = self::NOT_FOUND;
+		return false;
+	}
 
-    /**
-     * httpMethod form spoofing
-     */
-    protected function formSpoofing(): void
-    {
-        $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+	/**
+	 * httpMethod form spoofing
+	 */
+	protected function formSpoofing(): void
+	{
+		$post = $this->getRequestBody();
 
-        if (!empty($post['_method']) && in_array($post['_method'], ["PUT", "PATCH", "DELETE"])) {
-            $this->httpMethod = $post['_method'];
-            $this->data = $post;
+		if (!empty($post['_method']) && in_array($post['_method'], ["PUT", "PATCH", "DELETE"])) {
+			$this->httpMethod = $post['_method'];
+			$this->data = $post;
 
-            unset($this->data["_method"]);
-            return;
-        }
+			unset($this->data["_method"]);
+			return;
+		}
 
-        if ($this->httpMethod == "POST") {
-            $this->data = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+		if (in_array($this->httpMethod, ["POST", "PUT", "PATCH", "DELETE"])) {
+			$this->data = $this->getRequestBody();
 
-            unset($this->data["_method"]);
-            return;
-        }
+			unset($this->data["_method"]);
+			return;
+		}
 
-        if (in_array($this->httpMethod, ["PUT", "PATCH", "DELETE"]) && !empty($_SERVER['CONTENT_LENGTH'])) {
-            parse_str(file_get_contents('php://input', false, null, 0, $_SERVER['CONTENT_LENGTH']), $putPatch);
-            $this->data = $putPatch;
+		$this->data = [];
+		return;
+	}
 
-            unset($this->data["_method"]);
-            return;
-        }
+	protected function getRequestBody(): ?array
+	{
+		$headers = getallheaders();
 
-        $this->data = [];
-        return;
-    }
+		if (isset($headers['Content-Type']) && $headers['Content-Type'] === 'application/json') {
+			if (!isset($_SERVER['CONTENT_LENGTH'])) {
+				return [];
+			}
+
+			$rawPost = file_get_contents("php://input", false, null, 0, $_SERVER['CONTENT_LENGTH']);
+
+			$jsonData = json_decode($rawPost, true);
+
+			return $jsonData;
+		}
+
+		return filter_input_array(INPUT_POST, FILTER_DEFAULT);
+	}
 }
