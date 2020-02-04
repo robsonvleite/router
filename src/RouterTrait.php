@@ -138,7 +138,7 @@ trait RouterTrait
             $params = [];
             foreach ($data as $key => $value) {
                 $new_route = $this->bindData($routes, $arguments, $params, $key, $value);
-                if ($new_route == null) {
+                if ($new_route === null) {
                     $params[$key] = $value;
                     continue;
                 }
@@ -162,8 +162,8 @@ trait RouterTrait
     {
         foreach ($routes as $route_item) {
             if (strstr($route_item["route"], "{{$key}}")) {
-                $arguments["{{$key}}"] = $value;
-                return $this->process($route_item["route"], $arguments, $params);
+                $args["{{$key}}"] = $value;
+                return $this->process($route_item["route"], $args, $params);
             }
         }
         return null;
