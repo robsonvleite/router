@@ -195,12 +195,12 @@ abstract class Dispatch
     }
     
     /**
-     * @return void
+     * Rearrange routess
      */
     private function reorderRoutes(): void
     {
         foreach ($this->routes as $key => $value) {
-            uksort($value, [$this, 'sort']);
+            uksort($this->routes[$key], [$this, 'sort']);
         }
     }
     
