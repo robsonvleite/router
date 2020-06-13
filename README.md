@@ -33,7 +33,7 @@ CoffeeCode é um conjunto de pequenos e otimizados componentes PHP para tarefas 
 Router is available via Composer:
 
 ```bash
-"coffeecode/router": "^1.0"
+"coffeecode/router": "1.0.*"
 ```
 
 or run
