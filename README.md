@@ -48,7 +48,7 @@ composer require coffeecode/router
 
 Para mais detalhes sobre como usar o router, veja a pasta de exemplo com detalhes no diretório do componente. Para usar o router é preciso redirecionar sua navegação para o arquivo raiz de rotas (index.php) onde todo o tráfego deve ser tratado. O exemplo abaixo mostra como:
 
-######apache
+#### apache
 
 ```apacheconfig
 RewriteEngine On
@@ -69,7 +69,7 @@ RewriteCond %{SCRIPT_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?route=/$1 [L,QSA]
 ```
 
-######nginx
+#### nginx
 
 ````nginxconfig
 location / {
