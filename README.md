@@ -54,11 +54,11 @@ Para mais detalhes sobre como usar o router, veja a pasta de exemplo com detalhe
 RewriteEngine On
 #Options All -Indexes
 
-# ROUTER WWW Redirect.
+## ROUTER WWW Redirect.
 #RewriteCond %{HTTP_HOST} !^www\. [NC]
 #RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# ROUTER HTTPS Redirect
+## ROUTER HTTPS Redirect
 #RewriteCond %{HTTP:X-Forwarded-Proto} !https
 #RewriteCond %{HTTPS} off
 #RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
