@@ -187,9 +187,9 @@ abstract class Dispatch
 		$headers = getallheaders();
 
 		if (isset($headers['Content-Type']) && $headers['Content-Type'] === 'application/json') {
-			if (!isset($_SERVER['CONTENT_LENGTH'])) {
-				return [];
-			}
+            if (!isset($_SERVER['CONTENT_LENGTH']) || !$_SERVER['CONTENT_LENGTH']) {
+                return [];
+            }
 
 			$rawPost = file_get_contents("php://input", false, null, 0, $_SERVER['CONTENT_LENGTH']);
 
