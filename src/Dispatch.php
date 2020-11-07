@@ -161,7 +161,7 @@ abstract class Dispatch
      */
     protected function formSpoofing(): void
     {
-		$post = $this->getRequestBody();
+        $post = $this->getRequestBody();
 
         if (!empty($post['_method']) && in_array($post['_method'], ["PUT", "PATCH", "DELETE"])) {
             $this->httpMethod = $post['_method'];
@@ -172,7 +172,7 @@ abstract class Dispatch
         }
 
         if (in_array($this->httpMethod, ["POST", "PUT", "PATCH", "DELETE"])) {
-			$this->data = $this->getRequestBody();
+            $this->data = $this->getRequestBody();
 
             unset($this->data["_method"]);
             return;
@@ -183,21 +183,33 @@ abstract class Dispatch
     }
 
     protected function getRequestBody(): ?array
-	{
-		$headers = getallheaders();
+    {
+        $headers = $this->getallheaders();
 
-		if (isset($headers['Content-Type']) && $headers['Content-Type'] === 'application/json') {
+        if (isset($headers['Content-Type']) && $headers['Content-Type'] === 'application/json') {
             if (!isset($_SERVER['CONTENT_LENGTH']) || !$_SERVER['CONTENT_LENGTH']) {
                 return [];
             }
 
-			$rawPost = file_get_contents("php://input", false, null, 0, $_SERVER['CONTENT_LENGTH']);
+            $rawPost = file_get_contents("php://input", false, null, 0, $_SERVER['CONTENT_LENGTH']);
 
-			$jsonData = json_decode($rawPost, true);
+            $jsonData = json_decode($rawPost, true);
 
-			return $jsonData;
-		}
+            return $jsonData;
+        }
 
-		return filter_input_array(INPUT_POST, FILTER_DEFAULT);
-	}
+        return filter_input_array(INPUT_POST, FILTER_DEFAULT);
+    }
+
+
+    private function getallheaders()
+    {
+        $headers = [];
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
+        return $headers;
+    }
 }
