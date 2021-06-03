@@ -22,13 +22,23 @@ class Router extends Dispatch
     }
 
     /**
+     * @param string|array $middleware
+     */
+    public function middleware($middleware): Router
+    {
+        $this->middlewares($middleware);
+
+        return $this;
+    }
+
+    /**
      * @param string $route
      * @param $handler
      * @param string|null $name
      */
     public function post(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("POST", $route, $handler, $name);
+        $this->addRoute("POST", $route, $handler, $name)->resetMiddlewares();
     }
 
     /**
@@ -38,7 +48,7 @@ class Router extends Dispatch
      */
     public function get(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("GET", $route, $handler, $name);
+        $this->addRoute("GET", $route, $handler, $name)->resetMiddlewares();
     }
 
     /**
@@ -48,7 +58,7 @@ class Router extends Dispatch
      */
     public function put(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("PUT", $route, $handler, $name);
+        $this->addRoute("PUT", $route, $handler, $name)->resetMiddlewares();
     }
 
     /**
@@ -58,7 +68,7 @@ class Router extends Dispatch
      */
     public function patch(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("PATCH", $route, $handler, $name);
+        $this->addRoute("PATCH", $route, $handler, $name)->resetMiddlewares();
     }
 
     /**
@@ -68,6 +78,6 @@ class Router extends Dispatch
      */
     public function delete(string $route, $handler, string $name = null): void
     {
-        $this->addRoute("DELETE", $route, $handler, $name);
+        $this->addRoute("DELETE", $route, $handler, $name)->resetMiddlewares();
     }
 }

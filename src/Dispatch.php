@@ -2,6 +2,8 @@
 
 namespace CoffeeCode\Router;
 
+use CoffeeCode\Router\MiddlewareTrait;
+
 /**
  * Class CoffeeCode Dispatch
  *
@@ -10,7 +12,7 @@ namespace CoffeeCode\Router;
  */
 abstract class Dispatch
 {
-    use RouterTrait;
+    use RouterTrait, MiddlewareTrait;
 
     /** @var null|array */
     protected $route;
@@ -136,6 +138,13 @@ abstract class Dispatch
 
             $controller = $this->route['handler'];
             $method = $this->route['action'];
+
+            $this->setCurrentRoute($this->route);
+
+            if (!$this->resolveMiddleware($this->route)) {
+                $this->error = self::NOT_FOUND;
+                return false;
+            }
 
             if (class_exists($controller)) {
                 $newController = new $controller($this);

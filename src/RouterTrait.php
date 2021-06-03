@@ -13,6 +13,9 @@ trait RouterTrait
     /** @var string */
     protected $httpMethod;
 
+    /** @var string|array */
+    protected $currentMiddleware;
+
     /**
      * @param string $name
      * @param array|null $data
@@ -28,6 +31,20 @@ trait RouterTrait
             }
         }
         return null;
+    }
+
+    /**
+     * @var array|string $middleware
+     */
+    protected function middlewares($middleware)
+    {
+        $this->currentMiddleware = $middleware;
+    }
+
+    /** @return void */
+    protected function resetMiddlewares()
+    {
+        $this->currentMiddleware = '';
     }
 
     /**
@@ -57,7 +74,7 @@ trait RouterTrait
      * @param string|callable $handler
      * @param null|string
      */
-    protected function addRoute(string $method, string $route, $handler, string $name = null): void
+    protected function addRoute(string $method, string $route, $handler, string $name = null)
     {
         if ($route == "/") {
             $this->addRoute($method, "", $handler, $name);
@@ -81,6 +98,7 @@ trait RouterTrait
                 "name" => $name,
                 "method" => $method,
                 "handler" => $this->handler($handler, $namespace),
+                "middleware" => $this->currentMiddleware,
                 "action" => $this->action($handler),
                 "data" => $data
             ];
@@ -88,6 +106,8 @@ trait RouterTrait
 
         $route = preg_replace('~{([^}]*)}~', "([^/]+)", $route);
         $this->routes[$method][$route] = $router();
+
+        return $this;
     }
 
     /**

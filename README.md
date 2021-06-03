@@ -112,6 +112,31 @@ $router->get("/route", "Controller:method");
 $router->post("/route/{id}", "Controller:method");
 
 /**
+ * routes with middlewares
+ * use the setMiddlewares method to alias your middlewares
+ */
+
+$router->setMiddlewares([
+    "isAdmin" => \App\Http\Middlewares\UserIsAdmin::class,
+    "isLoggedIn" => \App\Http\Middlewares\UserLoggedIn::class
+]);
+
+/**
+ * you can pass middleware in various ways
+ */
+$router->middlewares("isAdmin")->get("/dashboard/users", "Controller:method");
+$router->middlewares("isAdmin, isLoggedIn")->get("/dashboard/users", "Controller:method");
+
+$router->middlewares(["isAdmin", "isLoggedIn"])->get("/dashboard/users", "Controller:method");
+
+$router->middlewares(\App\Http\Middlewares\UserIsAdmin::class)->get("/dashboard/users", "Controller:method");
+
+$router->middlewares([
+    \App\Http\Middlewares\UserIsAdmin::class,
+    \App\Http\Middlewares\UserLoggedIn::class
+])->get("/dashboard/users", "Controller:method");
+
+/**
  * Group Error
  * This monitors all Router errors. Are they: 400 Bad Request, 404 Not Found, 405 Method Not Allowed and 501 Not Implemented
  */
@@ -128,6 +153,22 @@ $router->dispatch();
  */
 if ($router->error()) {
     $router->redirect("/error/{$router->error()}");
+}
+```
+
+###### Middleware Class Example
+
+```php
+class UserIsAdmin
+{
+    public function handle($request, \Closure $next)
+    {
+        if(User::isAdmin()) {
+            return $next();
+        }
+
+        return false;
+    }
 }
 ```
 
@@ -164,7 +205,7 @@ if ($router->error()) {
 }
 ```
 
-###### Named Controller Exemple
+###### Named Controller Example
 
 ```php
 class Name
@@ -285,7 +326,7 @@ Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplic
 </form>
 ```
 
-##### PHP cURL exemple
+##### PHP cURL example
 
 ```php
 <?php
