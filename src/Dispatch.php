@@ -141,7 +141,7 @@ abstract class Dispatch
 
             $this->setCurrentRoute($this->route);
 
-            if (!$this->resolveMiddleware($this->route)) {
+            if (!$this->resolveMiddleware()) {
                 $this->error = self::NOT_FOUND;
                 return false;
             }
