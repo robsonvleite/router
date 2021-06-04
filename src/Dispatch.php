@@ -138,12 +138,15 @@ abstract class Dispatch
 
             $controller = $this->route['handler'];
             $method = $this->route['action'];
+            $middleware = $this->route['middleware'];
 
-            $this->setCurrentRoute($this->route);
-
-            if (!$this->resolveMiddleware()) {
-                $this->error = self::NOT_FOUND;
-                return false;
+            if (!empty($middleware)) {
+                $this->setCurrentRoute($this->route);
+    
+                if (!$this->executeMiddleware()) {
+                    $this->error = self::NOT_FOUND;
+                    return false;
+                }
             }
 
             if (class_exists($controller)) {

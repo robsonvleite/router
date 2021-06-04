@@ -46,7 +46,7 @@ trait MiddlewareTrait
     /**
      * @return mixed|bool
      */
-    protected function resolveMiddleware()
+    protected function executeMiddleware()
     {
         $middlewares = $this->currentRoute['middleware'];
 
@@ -75,7 +75,7 @@ trait MiddlewareTrait
      * @param string $alias
      * @return null|string
      */
-    public function getMiddlewareByAlias(String $alias)
+    protected function getMiddlewareByAlias(String $alias)
     {
         if (!array_key_exists($alias, $this->middlewares)) {
             return;
