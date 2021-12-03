@@ -140,7 +140,16 @@ abstract class Dispatch
             if (class_exists($controller)) {
                 $newController = new $controller($this);
                 if (method_exists($controller, $method)) {
+                    if ($this->httpMethod == "HEAD") {
+                        ob_start();
+                    }
+
                     $newController->$method(($this->route['data'] ?? []));
+
+                    if ($this->httpMethod == "HEAD") {
+                        ob_clean();
+                        ob_end_clean();
+                    }
                     return true;
                 }
 

@@ -39,6 +39,7 @@ class Router extends Dispatch
     public function get(string $route, $handler, string $name = null): void
     {
         $this->addRoute("GET", $route, $handler, $name);
+        $this->addRoute("HEAD", $route, $handler);
     }
 
     /**
