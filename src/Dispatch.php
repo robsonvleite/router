@@ -55,6 +55,7 @@ abstract class Dispatch
     {
         $this->projectUrl = (substr($projectUrl, "-1") == "/" ? substr($projectUrl, 0, -1) : $projectUrl);
         $this->patch = (filter_input(INPUT_GET, "route", FILTER_DEFAULT) ?? "/");
+        $this->patch = rtrim($this->patch, "/");
         $this->separator = ($separator ?? ":");
         $this->httpMethod = $_SERVER['REQUEST_METHOD'];
     }
