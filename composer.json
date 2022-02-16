@@ -18,7 +18,8 @@
     }
   ],
   "require": {
-    "php": ">=7.2"
+    "php": ">=7.2",
+    "icanboogie/inflector": "^2.2"
   },
   "autoload": {
     "psr-4": {
