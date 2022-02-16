@@ -186,6 +186,7 @@ abstract class Dispatch
             return;
         }
 
+        /* added by Beto Campoy */
         if ($this->httpMethod == "GET") {
             $queryString = filter_var(str_replace('?', "", strstr($_SERVER['REQUEST_URI'], "?")), FILTER_SANITIZE_STRIPPED);
             parse_str($queryString, $data);
@@ -195,6 +196,7 @@ abstract class Dispatch
             unset($this->data["_method"]);
             return;
         }
+        /* added by Beto Campoy */
 
         $this->data = [];
         return;
