@@ -186,6 +186,16 @@ abstract class Dispatch
             return;
         }
 
+        if ($this->httpMethod == "GET") {
+            $queryString = filter_var(str_replace('?', "", strstr($_SERVER['REQUEST_URI'], "?")), FILTER_SANITIZE_STRIPPED);
+            parse_str($queryString, $data);
+
+            $this->data = $data;
+
+            unset($this->data["_method"]);
+            return;
+        }
+
         $this->data = [];
         return;
     }
