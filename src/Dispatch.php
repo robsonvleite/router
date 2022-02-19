@@ -146,7 +146,7 @@ abstract class Dispatch
             $method = $this->route['action'];
 
             if (class_exists($controller)) {
-                $newController = new $controller($this->route);
+                $newController = new $controller($this);
                 if (method_exists($controller, $method)) {
                     $newController->$method(($this->route['data'] ?? []));
                     return true;
