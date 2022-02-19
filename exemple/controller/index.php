@@ -1,12 +1,12 @@
 <?php
 
-require dirname(__DIR__, 2) . "/vendor/autoload.php";
+require __DIR__ . "/../../vendor/autoload.php";
 require __DIR__ . "/Test/Coffee.php";
 require __DIR__ . "/Test/Name.php";
 
 use CoffeeCode\Router\Router;
 
-define("BASE", "https://www.localhost/coffeecode/router/exemple/controller");
+define("BASE", "https://www.localhost/projetos/repositorios/router/exemple/controller/");
 $router = new Router(BASE);
 
 /**

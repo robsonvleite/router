@@ -90,6 +90,14 @@ abstract class Dispatch
     /**
      * @return null|array
      */
+    public function request(): ?array
+    {
+        return $this->route;
+    }
+
+    /**
+     * @return null|array
+     */
     public function data(): ?array
     {
         return $this->data;
