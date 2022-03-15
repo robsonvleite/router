@@ -92,6 +92,5 @@ class Router extends Dispatch
         $this->addRoute("POST", $singularized_route, $handler.":store", ($name ? "{$name}.store" : null));
         $this->addRoute("POST", singularize($route)."/{$key_id}", $handler.":update", ($name ? "{$name}.update" : null));
         $this->addRoute("DELETE", singularize($route)."/{$key_id}", $handler.":delete", ($name ? "{$name}.delete" : null));
-
     }
 }
