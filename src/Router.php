@@ -87,10 +87,10 @@ class Router extends Dispatch
         $this->addRoute("GET", "{$route}/home", $handler.":list", ($name ? "{$name}.home" : null));
         $this->addRoute("GET", "{$route}/home/{search}/{page}", $handler.":list", ($name ? "{$name}.searchGet" : null));
         $this->addRoute("GET", $singularized_route, $handler.":create", ($name ? "{$name}.create" : null));
-        $this->addRoute("GET", singularize($route)."/{:id}", $handler.":edit", ($name ? "{$name}.edit" : null));
+        $this->addRoute("GET", singularize($route)."/{id}", $handler.":edit", ($name ? "{$name}.edit" : null));
         $this->addRoute("POST", "{$route}/search", $handler.":search", ($name ? "{$name}.searchPost" : null));
         $this->addRoute("POST", $singularized_route, $handler.":store", ($name ? "{$name}.store" : null));
-        $this->addRoute("POST", singularize($route)."/{:id}", $handler.":update", ($name ? "{$name}.update" : null));
-        $this->addRoute("DELETE", singularize($route)."/{:id}", $handler.":delete", ($name ? "{$name}.delete" : null));
+        $this->addRoute("POST", singularize($route)."/{id}", $handler.":update", ($name ? "{$name}.update" : null));
+        $this->addRoute("DELETE", singularize($route)."/{id}", $handler.":delete", ($name ? "{$name}.delete" : null));
     }
 }
