@@ -6,7 +6,7 @@ require __DIR__ . "/Test/Name.php";
 
 use CoffeeCode\Router\Router;
 
-define("BASE", "https://www.localhost/coffeecode/router/exemple/controller");
+const BASE = "https://www.localhost/coffeecode/router/exemple/controller";
 $router = new Router(BASE);
 
 /**
