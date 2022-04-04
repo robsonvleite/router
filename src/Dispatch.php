@@ -83,7 +83,7 @@ abstract class Dispatch
      */
     public function group(?string $group): Dispatch
     {
-        $this->group = ($group ? str_replace("/", "", $group) : null);
+        $this->group = ($group ? trim($group, "/") : null);
         return $this;
     }
 
