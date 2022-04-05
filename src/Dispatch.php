@@ -54,7 +54,7 @@ abstract class Dispatch
     public function __construct(string $projectUrl, ?string $separator = ":")
     {
         $this->projectUrl = (substr($projectUrl, "-1") == "/" ? substr($projectUrl, 0, -1) : $projectUrl);
-        $this->patch = rtrim((filter_input(INPUT_GET, "route", FILTER_DEFAULT) ?? "/"), "/");
+        $this->path = rtrim((filter_input(INPUT_GET, "route", FILTER_DEFAULT) ?? "/"), "/");
         $this->separator = ($separator ?? ":");
         $this->httpMethod = $_SERVER['REQUEST_METHOD'];
     }
@@ -96,6 +96,18 @@ abstract class Dispatch
     }
 
     /**
+     * @return object|null
+     */
+    public function current(): ?object
+    {
+        return (object)array_merge([
+            "namespace" => $this->namespace,
+            "group" => $this->group,
+            "path" => $this->path
+        ], $this->route);
+    }
+
+    /**
      * @return null|int
      */
     public function error(): ?int
@@ -115,7 +127,7 @@ abstract class Dispatch
 
         $this->route = null;
         foreach ($this->routes[$this->httpMethod] as $key => $route) {
-            if (preg_match("~^" . $key . "$~", $this->patch, $found)) {
+            if (preg_match("~^" . $key . "$~", $this->path, $found)) {
                 $this->route = $route;
             }
         }

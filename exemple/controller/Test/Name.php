@@ -30,7 +30,7 @@ class Name
 
     public function params(array $data): void
     {
-        var_dump($data);
+        var_dump($data, $this->router->current());
     }
 
     public function redirect($data): void
