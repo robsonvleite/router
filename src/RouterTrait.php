@@ -2,16 +2,22 @@
 
 namespace CoffeeCode\Router;
 
+use Closure;
+
+/**
+ * Trait RouterTrait
+ * @package CoffeeCode\Router
+ */
 trait RouterTrait
 {
     /** @var array */
-    protected $routes;
+    protected array $routes;
 
     /** @var string */
-    protected $path;
+    protected string $path;
 
     /** @var string */
-    protected $httpMethod;
+    protected string $httpMethod;
 
     /**
      * @param string $name
@@ -54,10 +60,10 @@ trait RouterTrait
     /**
      * @param string $method
      * @param string $route
-     * @param string|callable $handler
-     * @param null|string
+     * @param Closure|string $handler
+     * @param string|null $name
      */
-    protected function addRoute(string $method, string $route, $handler, string $name = null): void
+    protected function addRoute(string $method, string $route, Closure|string $handler, string $name = null): void
     {
         if ($route == "/") {
             $this->addRoute($method, "", $handler, $name);
@@ -95,20 +101,20 @@ trait RouterTrait
     }
 
     /**
-     * @param $handler
-     * @param $namespace
-     * @return string|callable
+     * @param Closure|string $handler
+     * @param string $namespace
+     * @return Closure|string
      */
-    private function handler($handler, $namespace)
+    private function handler(Closure|string $handler, string $namespace): Closure|string
     {
         return (!is_string($handler) ? $handler : "{$namespace}\\" . explode($this->separator, $handler)[0]);
     }
 
     /**
-     * @param $handler
-     * @return null|string
+     * @param Closure|string $handler
+     * @return string|null
      */
-    private function action($handler): ?string
+    private function action(Closure|string $handler): ?string
     {
         return (!is_string($handler) ?: (explode($this->separator, $handler)[1] ?? null));
     }

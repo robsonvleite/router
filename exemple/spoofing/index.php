@@ -10,42 +10,57 @@ $router = new Router(BASE);
 /**
  * GET httpMethod
  */
-$router->get("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>GET :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
+$router->get(
+    "/",
+    function ($data) {
+        $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
+        echo "<h1>GET :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
+    }
+);
 
 /**
  * POST httpMethod
  */
-$router->post("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>POST :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
+$router->post(
+    "/",
+    function ($data) {
+        $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
+        echo "<h1>POST :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
+    }
+);
 
 /**
  * PUT spoofing and httpMethod
  */
-$router->put("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>PUT :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
+$router->put(
+    "/",
+    function ($data) {
+        $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
+        echo "<h1>PUT :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
+    }
+);
 
 /**
  * PATCH spoofing and httpMethod
  */
-$router->patch("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>PATCH :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
+$router->patch(
+    "/",
+    function ($data) {
+        $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
+        echo "<h1>PATCH :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
+    }
+);
 
 /**
  * DELETE spoofing and httpMethod
  */
-$router->delete("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>DELETE :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
+$router->delete(
+    "/",
+    function ($data) {
+        $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
+        echo "<h1>DELETE :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
+    }
+);
 
 $router->dispatch();
 ?>

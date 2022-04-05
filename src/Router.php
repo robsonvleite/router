@@ -2,6 +2,8 @@
 
 namespace CoffeeCode\Router;
 
+use Closure;
+
 /**
  * Class CoffeeCode Router
  *
@@ -23,50 +25,50 @@ class Router extends Dispatch
 
     /**
      * @param string $route
-     * @param $handler
+     * @param Closure|string $handler
      * @param string|null $name
      */
-    public function post(string $route, $handler, string $name = null): void
+    public function post(string $route, Closure|string $handler, string $name = null): void
     {
         $this->addRoute("POST", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param $handler
+     * @param Closure|string $handler
      * @param string|null $name
      */
-    public function get(string $route, $handler, string $name = null): void
+    public function get(string $route, Closure|string $handler, string $name = null): void
     {
         $this->addRoute("GET", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param $handler
+     * @param Closure|string $handler
      * @param string|null $name
      */
-    public function put(string $route, $handler, string $name = null): void
+    public function put(string $route, Closure|string $handler, string $name = null): void
     {
         $this->addRoute("PUT", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param $handler
+     * @param Closure|string $handler
      * @param string|null $name
      */
-    public function patch(string $route, $handler, string $name = null): void
+    public function patch(string $route, Closure|string $handler, string $name = null): void
     {
         $this->addRoute("PATCH", $route, $handler, $name);
     }
 
     /**
      * @param string $route
-     * @param $handler
+     * @param Closure|string $handler
      * @param string|null $name
      */
-    public function delete(string $route, $handler, string $name = null): void
+    public function delete(string $route, Closure|string $handler, string $name = null): void
     {
         $this->addRoute("DELETE", $route, $handler, $name);
     }

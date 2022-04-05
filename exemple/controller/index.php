@@ -39,6 +39,23 @@ $router->get("/redirect/{category}/{page}", "Name:redirect", "name.redirect");
 $router->get("/params/{category}/page/{page}", "Name:params", "name.params");
 
 /**
+ * call route
+ */
+$router->group(null);
+$router->get(
+    "/call",
+    function ($data, Router $route) {
+        var_dump($data, $route->current());
+    }
+);
+$router->get(
+    "/call/{app}/{id}",
+    function ($data, Router $route) {
+        var_dump($data, $route->current());
+    }
+);
+
+/**
  * Group Error
  */
 $router->group("error")->namespace("Test");

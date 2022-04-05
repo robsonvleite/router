@@ -12,26 +12,26 @@ abstract class Dispatch
 {
     use RouterTrait;
 
-    /** @var null|array */
-    protected $route;
-
-    /** @var bool|string */
-    protected $projectUrl;
+    /** @var array|null */
+    protected ?array $route = null;
 
     /** @var string */
-    protected $separator;
+    protected string $projectUrl;
 
-    /** @var null|string */
-    protected $namespace;
+    /** @var string */
+    protected string $separator;
 
-    /** @var null|string */
-    protected $group;
+    /** @var string|null */
+    protected ?string $namespace = null;
 
-    /** @var null|array */
-    protected $data;
+    /** @var string|null */
+    protected ?string $group = null;
+
+    /** @var array|null */
+    protected ?array $data = null;
 
     /** @var int */
-    protected $error;
+    protected ?int $error = null;
 
     /** @const int Bad Request */
     public const BAD_REQUEST = 400;
@@ -100,11 +100,14 @@ abstract class Dispatch
      */
     public function current(): ?object
     {
-        return (object)array_merge([
-            "namespace" => $this->namespace,
-            "group" => $this->group,
-            "path" => $this->path
-        ], $this->route);
+        return (object)array_merge(
+            [
+                "namespace" => $this->namespace,
+                "group" => $this->group,
+                "path" => $this->path
+            ],
+            $this->route
+        );
     }
 
     /**
@@ -138,7 +141,7 @@ abstract class Dispatch
     /**
      * @return bool
      */
-    private function execute()
+    private function execute(): bool
     {
         if ($this->route) {
             if (is_callable($this->route['handler'])) {
