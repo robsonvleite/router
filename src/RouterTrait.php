@@ -63,11 +63,15 @@ trait RouterTrait
             $this->addRoute($method, "", $handler, $name);
         }
 
-        preg_match_all("~\{\s* ([a-zA-Z_][a-zA-Z0-9_-]*) \}~x", $route, $keys, PREG_SET_ORDER);
-        $routeDiff = array_values(array_diff_assoc(explode("/", $this->path), explode("/", $route)));
+        $removeGroupFromPath = $this->group ? str_replace($this->group, "", $this->path) : $this->path;
+        $pathAssoc = trim($removeGroupFromPath, "/");
+        $routeAssoc = trim($route, "/");
+
+        preg_match_all("~\{\s* ([a-zA-Z_][a-zA-Z0-9_-]*) \}~x", $routeAssoc, $keys, PREG_SET_ORDER);
+        $routeDiff = array_values(array_diff_assoc(explode("/", $pathAssoc), explode("/", $routeAssoc)));
 
         $this->formSpoofing();
-        $offset = ($this->group ? 1 : 0);
+        $offset = 0;
         foreach ($keys as $key) {
             $this->data[$key[1]] = ($routeDiff[$offset++] ?? null);
         }
