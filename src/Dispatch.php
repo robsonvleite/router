@@ -187,6 +187,5 @@ abstract class Dispatch
         }
 
         $this->data = [];
-        return;
     }
 }
