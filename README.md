@@ -11,13 +11,16 @@
 
 ###### Small, simple and uncomplicated. The router is a PHP route components with abstraction for MVC. Prepared with RESTfull verbs (GET, POST, PUT, PATCH and DELETE), works on its own layer in isolation and can be integrated without secrets to your application.
 
-Pequeno, simples e descomplicado. O router é um componentes de rotas PHP com abstração para MVC. Preparado com verbos RESTfull (GET, POST, PUT, PATCH e DELETE), trabalha em sua própria camada de forma isolada e pode ser integrado sem segredos a sua aplicação.
+Pequeno, simples e descomplicado. O router é um componentes de rotas PHP com abstração para MVC. Preparado com verbos
+RESTfull (GET, POST, PUT, PATCH e DELETE), trabalha em sua própria camada de forma isolada e pode ser integrado sem
+segredos a sua aplicação.
 
 ## About CoffeeCode
 
 ###### CoffeeCode is a set of small and optimized PHP components for common tasks. Held by Robson V. Leite and the UpInside team. With them you perform routine tasks with fewer lines, writing less and doing much more.
 
-CoffeeCode é um conjunto de pequenos e otimizados componentes PHP para tarefas comuns. Mantido por Robson V. Leite e a equipe UpInside. Com eles você executa tarefas rotineiras com poucas linhas, escrevendo menos e fazendo muito mais.
+CoffeeCode é um conjunto de pequenos e otimizados componentes PHP para tarefas comuns. Mantido por Robson V. Leite e a
+equipe UpInside. Com eles você executa tarefas rotineiras com poucas linhas, escrevendo menos e fazendo muito mais.
 
 ### Highlights
 
@@ -46,7 +49,9 @@ composer require coffeecode/router
 
 ###### For details on how to use the router, see the sample folder with details in the component directory. To use the router you need to redirect your route routing navigation (index.php) where all traffic must be handled. The example below shows how:
 
-Para mais detalhes sobre como usar o router, veja a pasta de exemplo com detalhes no diretório do componente. Para usar o router é preciso redirecionar sua navegação para o arquivo raiz de rotas (index.php) onde todo o tráfego deve ser tratado. O exemplo abaixo mostra como:
+Para mais detalhes sobre como usar o router, veja a pasta de exemplo com detalhes no diretório do componente. Para usar
+o router é preciso redirecionar sua navegação para o arquivo raiz de rotas (index.php) onde todo o tráfego deve ser
+tratado. O exemplo abaixo mostra como:
 
 #### apache
 
@@ -112,6 +117,13 @@ $router->get("/route", "Controller:method");
 $router->post("/route/{id}", "Controller:method");
 
 /**
+ * sub group
+ */
+$router->group("admin/support");
+$router->get("/tickets", "Controller:method");
+$router->post("/ticket/{id}", "Controller:method");
+
+/**
  * Group Error
  * This monitors all Router errors. Are they: 400 Bad Request, 404 Not Found, 405 Method Not Allowed and 501 Not Implemented
  */
@@ -164,7 +176,7 @@ if ($router->error()) {
 }
 ```
 
-###### Named Controller Exemple
+###### Named Controller Example
 
 ```php
 class Name
@@ -190,6 +202,7 @@ class Name
 ```
 
 ###### Named Params
+
 ````php
 //route
 $router->get("/params/{category}/page/{page}", "Name:params", "name.params");
@@ -225,6 +238,15 @@ https://www.{}/name/params/22/page/2?argument1=most+filter&argument2=most+search
 $router->get("/", function ($data) {
     $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
     echo "<h1>GET :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
+});
+
+/**
+ * GET httpMethod and Route
+ */
+ $router->get("/", function ($data, Router $route) {
+    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
+    echo "<h1>GET :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
+    var_dump($route->current());
 });
 
 /**
@@ -266,9 +288,11 @@ $router->dispatch();
 
 ###### This example shows how to access the routes (PUT, PATCH, DELETE) from the application. You can see more details in the sample folder. From an attention to the _method field, it can be of the hidden type.
 
-Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplicação. Você pode ver mais detalhes na pasta de exemplo. De uma atenção para o campo _method, ele pode ser do tipo hidden.
+Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplicação. Você pode ver mais detalhes na
+pasta de exemplo. De uma atenção para o campo _method, ele pode ser do tipo hidden.
 
 ```html
+
 <form action="" method="POST">
     <select name="_method">
         <option value="POST">POST</option>
@@ -285,7 +309,7 @@ Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplic
 </form>
 ```
 
-##### PHP cURL exemple
+##### PHP cURL example
 
 ```php
 <?php
@@ -293,7 +317,7 @@ Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplic
 $curl = curl_init();
 
 curl_setopt_array($curl, array(
-  CURLOPT_URL => "http://localhost/coffeecode/router/exemple/spoofing/",
+  CURLOPT_URL => "http://localhost/coffeecode/router/example/spoofing/",
   CURLOPT_RETURNTRANSFER => true,
   CURLOPT_ENCODING => "",
   CURLOPT_MAXREDIRS => 10,
@@ -327,7 +351,8 @@ Please see [CONTRIBUTING](https://github.com/robsonvleite/router/blob/master/CON
 
 ###### Security: If you discover any security related issues, please email cursos@upinside.com.br instead of using the issue tracker.
 
-Se você descobrir algum problema relacionado à segurança, envie um e-mail para cursos@upinside.com.br em vez de usar o rastreador de problemas.
+Se você descobrir algum problema relacionado à segurança, envie um e-mail para cursos@upinside.com.br em vez de usar o
+rastreador de problemas.
 
 Thank you
 
@@ -339,4 +364,5 @@ Thank you
 
 ## License
 
-The MIT License (MIT). Please see [License File](https://github.com/robsonvleite/router/blob/master/LICENSE) for more information.
+The MIT License (MIT). Please see [License File](https://github.com/robsonvleite/router/blob/master/LICENSE) for more
+information.

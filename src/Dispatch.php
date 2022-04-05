@@ -142,7 +142,7 @@ abstract class Dispatch
     {
         if ($this->route) {
             if (is_callable($this->route['handler'])) {
-                call_user_func($this->route['handler'], ($this->route['data'] ?? []));
+                call_user_func($this->route['handler'], ($this->route['data'] ?? []), $this);
                 return true;
             }
 
