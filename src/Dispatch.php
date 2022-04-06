@@ -105,9 +105,10 @@ abstract class Dispatch
             [
                 "namespace" => $this->namespace,
                 "group" => $this->group,
-                "path" => $this->path
+                "path" => $this->path,
+                "middleware" => $this->middleware,
             ],
-            $this->route
+            $this->route ?? []
         );
     }
 
