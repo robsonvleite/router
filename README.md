@@ -300,6 +300,16 @@ $router->get("/call", function ($data, Router $router){
 }, middleware: \Http\User::class);
  ```
 
+##### Simple Middleware Group
+
+```php 
+//group single or multiple
+$router->group("name", \Http\User::class);
+$router->get("/", "Name:home", "name.home");
+$router->get("/hello", "Name:hello", "name.hello");
+$router->get("/redirect", "Name:redirect", "name.redirect");
+```
+
 ##### Simple Middleware Class Example
 
 ```php 

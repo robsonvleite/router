@@ -92,6 +92,7 @@ trait RouterTrait
         $route = (!$this->group ? $route : "/{$this->group}{$route}");
         $data = $this->data;
         $namespace = $this->namespace;
+        $middleware = $middleware ?? (!empty($this->middleware[$this->group]) ? $this->middleware[$this->group] : null);
         $router = function () use ($method, $handler, $data, $route, $name, $namespace, $middleware) {
             return [
                 "route" => $route,
@@ -106,7 +107,6 @@ trait RouterTrait
 
         $route = preg_replace('~{([^}]*)}~', "([^/]+)", $route);
         $this->routes[$method][$route] = $router();
-        $this->middleware = null;
     }
 
     /**

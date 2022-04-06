@@ -37,27 +37,27 @@ $router->get("/user/{id}/profile", "Coffee:admin");
 $router->get("/user/{id}/profile/{photo}", "Coffee:admin");
 
 /**
- * named routes
+ * named routes and middlewares
  */
 $router->group("name");
 $router->get("/", "Name:home", "name.home");
-$router->get("/hello", "Name:hello", "name.hello");
-$router->get("/redirect", "Name:redirect", "name.redirect");
+$router->get("/hello", "Name:hello", "name.hello", \Http\User::class);
+$router->get("/redirect", "Name:redirect", "name.redirect", \Http\User::class);
 $router->get("/redirect/{category}/{page}", "Name:redirect", "name.redirect");
 $router->get("/params/{category}/page/{page}", "Name:params", "name.params");
 
 /**
- * call route
+ * call route and group middleware
  */
-$router->group(null);
+$router->group("call", \Http\User::class);
 $router->get(
-    "/call",
+    "/",
     function ($data, Router $route) {
         var_dump($data, $route->current());
     }
 );
 $router->get(
-    "/call/{app}/{id}",
+    "/{app}/",
     function ($data, Router $route) {
         var_dump($data, $route->current());
     }
