@@ -36,7 +36,7 @@ equipe UpInside. Com eles você executa tarefas rotineiras com poucas linhas, es
 Router is available via Composer:
 
 ```bash
-"coffeecode/router": "8.0.*"
+"coffeecode/router": "2.0.*"
 ```
 
 or run
