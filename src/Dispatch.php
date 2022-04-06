@@ -144,6 +144,10 @@ abstract class Dispatch
     private function execute(): bool
     {
         if ($this->route) {
+            if (!$this->middleware()) {
+                return false;
+            }
+
             if (is_callable($this->route['handler'])) {
                 call_user_func($this->route['handler'], ($this->route['data'] ?? []), $this);
                 return true;

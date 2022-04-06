@@ -4,6 +4,12 @@ require dirname(__DIR__, 2) . "/vendor/autoload.php";
 require __DIR__ . "/Test/Coffee.php";
 require __DIR__ . "/Test/Name.php";
 
+/*
+ * Middleware example classes
+ */
+require __DIR__ . "/Http/User.php";
+require __DIR__ . "/Http/Admin.php";
+
 use CoffeeCode\Router\Router;
 
 const BASE = "https://www.localhost/coffeecode/router/exemple/controller";
@@ -15,8 +21,10 @@ $router = new Router(BASE);
 $router->namespace("Test");
 
 $router->get("/", "Coffee:home");
-$router->get("/edit/{id}", "Coffee:edit");
+$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\User::class);
 $router->post("/edit/{id}", "Coffee:edit");
+$router->get("/logado", "Coffee:logged", middleware: [\Http\User::class, \Http\Admin::class]);
+$router->get("/negado", "Coffee:denied", "coffe.denied", \Http\Admin::class);
 
 /**
  * group by routes and namespace

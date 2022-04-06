@@ -19,6 +19,9 @@ trait RouterTrait
     /** @var string */
     protected string $httpMethod;
 
+    /** @var array|null */
+    protected ?array $middleware = null;
+
     /**
      * @param string $name
      * @param array|null $data
@@ -62,12 +65,16 @@ trait RouterTrait
      * @param string $route
      * @param Closure|string $handler
      * @param string|null $name
+     * @param array|string|null $middleware
      */
-    protected function addRoute(string $method, string $route, Closure|string $handler, string $name = null): void
-    {
-        if ($route == "/") {
-            $this->addRoute($method, "", $handler, $name);
-        }
+    protected function addRoute(
+        string $method,
+        string $route,
+        Closure|string $handler,
+        string $name = null,
+        array|string $middleware = null
+    ): void {
+        $route = rtrim($route, "/");
 
         $removeGroupFromPath = $this->group ? str_replace($this->group, "", $this->path) : $this->path;
         $pathAssoc = trim($removeGroupFromPath, "/");
@@ -85,11 +92,12 @@ trait RouterTrait
         $route = (!$this->group ? $route : "/{$this->group}{$route}");
         $data = $this->data;
         $namespace = $this->namespace;
-        $router = function () use ($method, $handler, $data, $route, $name, $namespace) {
+        $router = function () use ($method, $handler, $data, $route, $name, $namespace, $middleware) {
             return [
                 "route" => $route,
                 "name" => $name,
                 "method" => $method,
+                "middlewares" => $middleware,
                 "handler" => $this->handler($handler, $namespace),
                 "action" => $this->action($handler),
                 "data" => $data
@@ -98,6 +106,34 @@ trait RouterTrait
 
         $route = preg_replace('~{([^}]*)}~', "([^/]+)", $route);
         $this->routes[$method][$route] = $router();
+        $this->middleware = null;
+    }
+
+    /**
+     * @return bool
+     */
+    private function middleware(): bool
+    {
+        if (empty($this->route["middlewares"])) {
+            return true;
+        }
+
+        $middlewares = is_array(
+            $this->route["middlewares"]
+        ) ? $this->route["middlewares"] : [$this->route["middlewares"]];
+
+        foreach ($middlewares as $middleware) {
+            if (class_exists($middleware)) {
+                $newMiddleware = new $middleware;
+                if (method_exists($newMiddleware, "handle")) {
+                    if (!$newMiddleware->handle($this)) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

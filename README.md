@@ -36,7 +36,7 @@ equipe UpInside. Com eles você executa tarefas rotineiras com poucas linhas, es
 Router is available via Composer:
 
 ```bash
-"coffeecode/router": "1.0.*"
+"coffeecode/router": "8.0.*"
 ```
 
 or run
@@ -53,7 +53,7 @@ Para mais detalhes sobre como usar o router, veja a pasta de exemplo com detalhe
 o router é preciso redirecionar sua navegação para o arquivo raiz de rotas (index.php) onde todo o tráfego deve ser
 tratado. O exemplo abaixo mostra como:
 
-#### apache
+#### Apache
 
 ```apacheconfig
 RewriteEngine On
@@ -74,7 +74,7 @@ RewriteCond %{SCRIPT_FILENAME} !-d
 RewriteRule ^(.*)$ index.php?route=/$1 [L,QSA]
 ```
 
-#### nginx
+#### Nginx
 
 ````nginxconfig
 location / {
@@ -284,6 +284,42 @@ $router->delete("/", function ($data) {
 $router->dispatch();
 ```
 
+##### Simple Middleware
+
+```php
+//simple
+$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\User::class);
+$router->get("/denied", "Coffee:denied", "coffe.denied", \Http\Admin::class);
+
+//multiple
+$router->get("/logado", "Coffee:logged", middleware: [\Http\User::class, \Http\Admin::class]);
+
+//callable
+$router->get("/call", function ($data, Router $router){
+    //code here
+}, middleware: \Http\User::class);
+ ```
+
+##### Simple Middleware Class Example
+
+```php 
+namespace Http;
+
+use CoffeeCode\Router\Router;
+
+class User
+{
+    public function handle(Router $router): bool
+    {
+        $user = true;
+        if ($user) {
+            return true;
+        }
+        return false;
+    }
+}
+```
+
 ##### Form Spoofing
 
 ###### This example shows how to access the routes (PUT, PATCH, DELETE) from the application. You can see more details in the sample folder. From an attention to the _method field, it can be of the hidden type.
@@ -292,7 +328,6 @@ Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplic
 pasta de exemplo. De uma atenção para o campo _method, ele pode ser do tipo hidden.
 
 ```html
-
 <form action="" method="POST">
     <select name="_method">
         <option value="POST">POST</option>
