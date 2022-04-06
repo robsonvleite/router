@@ -129,7 +129,13 @@ trait RouterTrait
                     if (!$newMiddleware->handle($this)) {
                         return false;
                     }
+                } else {
+                    $this->error = self::METHOD_NOT_ALLOWED;
+                    return false;
                 }
+            } else {
+                $this->error = self::NOT_IMPLEMENTED;
+                return false;
             }
         }
 
