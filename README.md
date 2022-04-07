@@ -5,7 +5,6 @@
 [![PHP from Packagist](https://img.shields.io/packagist/php-v/coffeecode/router.svg?style=flat-square)](https://packagist.org/packages/coffeecode/router)
 [![Latest Version](https://img.shields.io/github/release/robsonvleite/router.svg?style=flat-square)](https://github.com/robsonvleite/router/releases)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
-[![Build](https://img.shields.io/scrutinizer/build/g/robsonvleite/router.svg?style=flat-square)](https://scrutinizer-ci.com/g/robsonvleite/router)
 [![Quality Score](https://img.shields.io/scrutinizer/g/robsonvleite/router.svg?style=flat-square)](https://scrutinizer-ci.com/g/robsonvleite/router)
 [![Total Downloads](https://img.shields.io/packagist/dt/coffeecode/router.svg?style=flat-square)](https://packagist.org/packages/coffeecode/router)
 
@@ -88,7 +87,6 @@ location / {
 
 ```php
 <?php
-require __DIR__ . "/../vendor/autoload.php";
 
 use CoffeeCode\Router\Router;
 
@@ -147,7 +145,6 @@ if ($router->error()) {
 
 ```php
 <?php
-require __DIR__ . "/../vendor/autoload.php";
 
 use CoffeeCode\Router\Router;
 
@@ -179,6 +176,8 @@ if ($router->error()) {
 ###### Named Controller Example
 
 ```php
+<?php
+
 class Name
 {
     public function __construct($router)
@@ -204,11 +203,7 @@ class Name
 ###### Named Params
 
 ````php
-//route
-$router->get("/params/{category}/page/{page}", "Name:params", "name.params");
-
-//$this->route = return URL
-//$this->redirect = redirect URL
+<?php
 
 $this->router->route("name.params", [
     "category" => 22,
@@ -232,6 +227,8 @@ https://www.{}/name/params/22/page/2?argument1=most+filter&argument2=most+search
 ##### Callable
 
 ```php
+<?php
+
 /**
  * GET httpMethod
  */
@@ -287,6 +284,8 @@ $router->dispatch();
 ##### Simple Middleware
 
 ```php
+<?php
+
 //simple
 $router->get("/edit/{id}", "Coffee:edit", middleware: \Http\User::class);
 $router->get("/denied", "Coffee:denied", "coffe.denied", \Http\Admin::class);
@@ -298,11 +297,13 @@ $router->get("/logado", "Coffee:logged", middleware: [\Http\User::class, \Http\A
 $router->get("/call", function ($data, Router $router){
     //code here
 }, middleware: \Http\User::class);
- ```
+```
 
 ##### Simple Middleware Group
 
-```php 
+```php
+<?php
+
 //group single or multiple
 $router->group("name", \Http\User::class);
 $router->get("/", "Name:home", "name.home");
@@ -312,7 +313,9 @@ $router->get("/redirect", "Name:redirect", "name.redirect");
 
 ##### Simple Middleware Class Example
 
-```php 
+```php
+<?php
+
 namespace Http;
 
 use CoffeeCode\Router\Router;
