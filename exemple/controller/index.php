@@ -7,8 +7,9 @@ require __DIR__ . "/Test/Name.php";
 /*
  * Middleware example classes
  */
+require __DIR__ . "/Http/Guest.php";
 require __DIR__ . "/Http/User.php";
-require __DIR__ . "/Http/Admin.php";
+require __DIR__ . "/Http/Group.php";
 
 use CoffeeCode\Router\Router;
 
@@ -21,52 +22,57 @@ $router = new Router(BASE);
 $router->namespace("Test");
 
 $router->get("/", "Coffee:home");
-$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\User::class);
+$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\Guest::class);
 $router->post("/edit/{id}", "Coffee:edit");
-$router->get("/logado", "Coffee:logged", middleware: [\Http\User::class, \Http\Admin::class]);
-$router->get("/negado", "Coffee:denied", "coffe.denied", \Http\Admin::class);
+$router->get("/logado", "Coffee:logged", middleware: [\Http\Guest::class, \Http\User::class]);
+$router->get("/negado", "Coffee:denied", "coffe.denied", \Http\User::class);
 
 /**
  * group by routes and namespace
  */
-$router->group("admin");
+$router->group("admin", \Http\Group::class);
 
 $router->get("/", "Coffee:admin");
 $router->get("/user/{id}", "Coffee:admin");
-$router->get("/user/{id}/profile", "Coffee:admin");
+$router->get("/user/{id}/profile", "Coffee:admin", \Http\Guest::class);
 $router->get("/user/{id}/profile/{photo}", "Coffee:admin");
 
 /**
  * named routes and middlewares
  */
 $router->group("name");
+
 $router->get("/", "Name:home", "name.home");
-$router->get("/hello", "Name:hello", "name.hello", \Http\User::class);
-$router->get("/redirect", "Name:redirect", "name.redirect", \Http\User::class);
-$router->get("/redirect/{category}/{page}", "Name:redirect", "name.redirect");
-$router->get("/params/{category}/page/{page}", "Name:params", "name.params");
+$router->get("/hello", "Name:hello", "name.hello", \Http\Guest::class);
+$router->get("/redirect", "Name:redirect", "name.redirect", \Http\Guest::class);
+$router->get("/redirect/{category}/{page}", "name:redirect", "name.redirect.params");
+$router->get("/params/{category}/page/{page}", "name:params", "name.params");
 
 /**
  * call route and group middleware
  */
-$router->group("call", \Http\User::class);
+$router->group("call", \Http\Guest::class);
 $router->get(
     "/",
     function ($data, Router $route) {
         var_dump($data, $route->current());
+
+        echo "<a href='{$route->home()}' title='voltar'>voltar</a>";
     }
 );
 $router->get(
     "/{app}/",
     function ($data, Router $route) {
         var_dump($data, $route->current());
+
+        echo "<a href='{$route->home()}' title='voltar'>voltar</a>";
     }
 );
 
 /**
  * Group Error
  */
-$router->group("error")->namespace("Test");
+$router->namespace("Test")->group("error");
 $router->get("/{errcode}", "Coffee:notFound");
 
 /**

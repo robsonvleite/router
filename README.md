@@ -111,6 +111,7 @@ $router->delete("/route/{id}", "Controller:method");
  * The controller must be in the namespace Dash\Controller
  */
 $router->group("admin")->namespace("Dash");
+
 $router->get("/route", "Controller:method");
 $router->post("/route/{id}", "Controller:method");
 
@@ -118,6 +119,7 @@ $router->post("/route/{id}", "Controller:method");
  * sub group
  */
 $router->group("admin/support");
+
 $router->get("/tickets", "Controller:method");
 $router->post("/ticket/{id}", "Controller:method");
 
@@ -205,13 +207,17 @@ class Name
 ````php
 <?php
 
+use CoffeeCode\Router\Router;
+
+$router = new Router("https://www.youdomain.com");
+
 $this->router->route("name.params", [
     "category" => 22,
     "page" => 2
 ]);
 
 //result
-https://www.{}/name/params/22/page/2
+//https://www.youdomain.com/name/params/22/page/2
 
 $this->router->route("name.params", [
     "category" => 22,
@@ -221,13 +227,17 @@ $this->router->route("name.params", [
 ]);
 
 //result
-https://www.{}/name/params/22/page/2?argument1=most+filter&argument2=most+search
+//https://www.youdomain.com/name/params/22/page/2?argument1=most+filter&argument2=most+search
 ````
 
 ##### Callable
 
 ```php
 <?php
+
+use CoffeeCode\Router\Router;
+
+$router = new Router("https://www.youdomain.com");
 
 /**
  * GET httpMethod
@@ -286,17 +296,21 @@ $router->dispatch();
 ```php
 <?php
 
+use CoffeeCode\Router\Router;
+
+$router = new Router("https://www.youdomain.com");
+
 //simple
-$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\User::class);
-$router->get("/denied", "Coffee:denied", "coffe.denied", \Http\Admin::class);
+$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\Guest::class);
+$router->get("/denied", "Coffee:denied", "coffe.denied", \Http\Group::class);
 
 //multiple
-$router->get("/logado", "Coffee:logged", middleware: [\Http\User::class, \Http\Admin::class]);
+$router->get("/logado", "Coffee:logged", middleware: [\Http\Guest::class, \Http\Group::class]);
 
 //callable
 $router->get("/call", function ($data, Router $router){
     //code here
-}, middleware: \Http\User::class);
+}, middleware: \Http\Guest::class);
 ```
 
 ##### Simple Middleware Group
@@ -304,8 +318,12 @@ $router->get("/call", function ($data, Router $router){
 ```php
 <?php
 
+use CoffeeCode\Router\Router;
+
+$router = new Router("https://www.youdomain.com");
+
 //group single or multiple
-$router->group("name", \Http\User::class);
+$router->group("name", \Http\Guest::class);
 $router->get("/", "Name:home", "name.home");
 $router->get("/hello", "Name:hello", "name.hello");
 $router->get("/redirect", "Name:redirect", "name.redirect");
@@ -326,6 +344,7 @@ class User
     {
         $user = true;
         if ($user) {
+            var_dump($router->current());
             return true;
         }
         return false;
@@ -341,6 +360,7 @@ Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplic
 pasta de exemplo. De uma atenção para o campo _method, ele pode ser do tipo hidden.
 
 ```html
+
 <form action="" method="POST">
     <select name="_method">
         <option value="POST">POST</option>

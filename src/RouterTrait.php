@@ -10,56 +10,6 @@ use Closure;
  */
 trait RouterTrait
 {
-    /** @var array */
-    protected array $routes;
-
-    /** @var string */
-    protected string $path;
-
-    /** @var string */
-    protected string $httpMethod;
-
-    /** @var array|null */
-    protected ?array $middleware = null;
-
-    /**
-     * @param string $name
-     * @param array|null $data
-     * @return string|null
-     */
-    public function route(string $name, array $data = null): ?string
-    {
-        foreach ($this->routes as $http_verb) {
-            foreach ($http_verb as $route_item) {
-                if (!empty($route_item["name"]) && $route_item["name"] == $name) {
-                    return $this->treat($route_item, $data);
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * @param string $route
-     * @param array|null $data
-     */
-    public function redirect(string $route, array $data = null): void
-    {
-        if ($name = $this->route($route, $data)) {
-            header("Location: {$name}");
-            exit;
-        }
-
-        if (filter_var($route, FILTER_VALIDATE_URL)) {
-            header("Location: {$route}");
-            exit;
-        }
-
-        $route = (substr($route, 0, 1) == "/" ? $route : "/{$route}");
-        header("Location: {$this->projectUrl}{$route}");
-        exit;
-    }
-
     /**
      * @param string $method
      * @param string $route
@@ -107,6 +57,76 @@ trait RouterTrait
 
         $route = preg_replace('~{([^}]*)}~', "([^/]+)", $route);
         $this->routes[$method][$route] = $router();
+    }
+
+    /**
+     * httpMethod form spoofing
+     */
+    protected function formSpoofing(): void
+    {
+        $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+
+        if (!empty($post['_method']) && in_array($post['_method'], ["PUT", "PATCH", "DELETE"])) {
+            $this->httpMethod = $post['_method'];
+            $this->data = $post;
+
+            unset($this->data["_method"]);
+            return;
+        }
+
+        if ($this->httpMethod == "POST") {
+            $this->data = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+
+            unset($this->data["_method"]);
+            return;
+        }
+
+        if (in_array($this->httpMethod, ["PUT", "PATCH", "DELETE"]) && !empty($_SERVER['CONTENT_LENGTH'])) {
+            parse_str(file_get_contents('php://input', false, null, 0, $_SERVER['CONTENT_LENGTH']), $putPatch);
+            $this->data = $putPatch;
+
+            unset($this->data["_method"]);
+            return;
+        }
+
+        $this->data = [];
+    }
+
+    /**
+     * @return bool
+     */
+    private function execute(): bool
+    {
+        if ($this->route) {
+            if (!$this->middleware()) {
+                return false;
+            }
+
+            if (is_callable($this->route['handler'])) {
+                call_user_func($this->route['handler'], ($this->route['data'] ?? []), $this);
+                return true;
+            }
+
+            $controller = $this->route['handler'];
+            $method = $this->route['action'];
+
+            if (class_exists($controller)) {
+                $newController = new $controller($this);
+                if (method_exists($controller, $method)) {
+                    $newController->$method(($this->route['data'] ?? []));
+                    return true;
+                }
+
+                $this->error = self::METHOD_NOT_ALLOWED;
+                return false;
+            }
+
+            $this->error = self::BAD_REQUEST;
+            return false;
+        }
+
+        $this->error = self::NOT_FOUND;
+        return false;
     }
 
     /**
