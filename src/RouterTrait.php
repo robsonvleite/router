@@ -2,8 +2,6 @@
 
 namespace CoffeeCode\Router;
 
-use Closure;
-
 /**
  * Trait RouterTrait
  * @package CoffeeCode\Router
@@ -13,14 +11,14 @@ trait RouterTrait
     /**
      * @param string $method
      * @param string $route
-     * @param Closure|string $handler
+     * @param callable|string $handler
      * @param string|null $name
      * @param array|string|null $middleware
      */
     protected function addRoute(
         string $method,
         string $route,
-        Closure|string $handler,
+        callable|string $handler,
         string $name = null,
         array|string $middleware = null
     ): void {
@@ -163,20 +161,20 @@ trait RouterTrait
     }
 
     /**
-     * @param Closure|string $handler
-     * @param string $namespace
-     * @return Closure|string
+     * @param callable|string $handler
+     * @param string|null $namespace
+     * @return callable|string
      */
-    private function handler(Closure|string $handler, string $namespace): Closure|string
+    private function handler(callable|string $handler, ?string $namespace): callable|string
     {
         return (!is_string($handler) ? $handler : "{$namespace}\\" . explode($this->separator, $handler)[0]);
     }
 
     /**
-     * @param Closure|string $handler
+     * @param callable|string $handler
      * @return string|null
      */
-    private function action(Closure|string $handler): ?string
+    private function action(callable|string $handler): ?string
     {
         return (!is_string($handler) ?: (explode($this->separator, $handler)[1] ?? null));
     }
