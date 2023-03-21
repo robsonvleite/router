@@ -7,11 +7,13 @@ require __DIR__ . "/Test/Name.php";
 /*
  * Middleware example classes
  */
+require __DIR__ . "/Http/Middlewares.php";
 require __DIR__ . "/Http/Guest.php";
 require __DIR__ . "/Http/User.php";
 require __DIR__ . "/Http/Group.php";
 
 use CoffeeCode\Router\Router;
+use Http\Middlewares as Middleware;
 
 const BASE = "https://www.localhost/coffeecode/router/exemple/controller";
 $router = new Router(BASE);
@@ -22,10 +24,10 @@ $router = new Router(BASE);
 $router->namespace("Test");
 
 $router->get("/", "Coffee:home");
-$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\Guest::class);
+$router->get("/edit/{id}", "Coffee:edit", middleware: Middleware::GUEST);
 $router->post("/edit/{id}", "Coffee:edit");
 $router->get("/logado", "Coffee:logged", middleware: [\Http\Guest::class, \Http\User::class]);
-$router->get("/negado", "Coffee:denied", "coffe.denied", \Http\User::class);
+$router->get("/negado", "Coffee:denied", "coffe.denied", Middleware::USER);
 
 /**
  * group by routes and namespace
@@ -45,13 +47,13 @@ $router->group("name");
 $router->get("/", "Name:home", "name.home");
 $router->get("/hello", "Name:hello", "name.hello", \Http\Guest::class);
 $router->get("/params/{category}/page/{page}", "name:params", "name.params");
-$router->get("/redirect", "Name:redirect", "name.redirect", \Http\Guest::class);
+$router->get("/redirect", "Name:redirect", "name.redirect", Middleware::GUEST);
 $router->get("/redirect/{category}/{page}", "name:redirect", "name.redirect.params");
 
 /**
  * call route and group middleware
  */
-$router->group("call", \Http\Guest::class);
+$router->group("call", Middleware::GUEST);
 $router->get(
     "/",
     function ($data, Router $route) {
