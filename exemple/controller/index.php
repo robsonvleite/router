@@ -44,9 +44,9 @@ $router->group("name");
 
 $router->get("/", "Name:home", "name.home");
 $router->get("/hello", "Name:hello", "name.hello", \Http\Guest::class);
+$router->get("/params/{category}/page/{page}", "name:params", "name.params");
 $router->get("/redirect", "Name:redirect", "name.redirect", \Http\Guest::class);
 $router->get("/redirect/{category}/{page}", "name:redirect", "name.redirect.params");
-$router->get("/params/{category}/page/{page}", "name:params", "name.params");
 
 /**
  * call route and group middleware
