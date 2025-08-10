@@ -1,436 +1,301 @@
-# Router @CoffeeCode
+# Router @HellFiveOsborn (Fork of CoffeeCode Router)
 
-[![Maintainer](http://img.shields.io/badge/maintainer-@robsonvleite-blue.svg?style=flat-square)](https://twitter.com/robsonvleite)
-[![Source Code](http://img.shields.io/badge/source-coffeecode/router-blue.svg?style=flat-square)](https://github.com/robsonvleite/router)
-[![PHP from Packagist](https://img.shields.io/packagist/php-v/coffeecode/router.svg?style=flat-square)](https://packagist.org/packages/coffeecode/router)
-[![Latest Version](https://img.shields.io/github/release/robsonvleite/router.svg?style=flat-square)](https://github.com/robsonvleite/router/releases)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
-[![Quality Score](https://img.shields.io/scrutinizer/g/robsonvleite/router.svg?style=flat-square)](https://scrutinizer-ci.com/g/robsonvleite/router)
-[![Total Downloads](https://img.shields.io/packagist/dt/coffeecode/router.svg?style=flat-square)](https://packagist.org/packages/coffeecode/router)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
+[![PHP](https://img.shields.io/badge/PHP-%3E%3D%208.0-777bb4.svg?style=flat-square)](composer.json)
 
-###### Small, simple and uncomplicated. The router is a PHP route components with abstraction for MVC. Prepared with RESTfull verbs (GET, POST, PUT, PATCH and DELETE), works on its own layer in isolation and can be integrated without secrets to your application.
+A next‑gen, production‑ready PHP router. Autonomous (no .htaccess/Nginx required), secure static asset serving with ETag/Last‑Modified/Range, robust HTTP semantics (HEAD/OPTIONS/405), route constraints, CLI tools for DX, and global helpers.
 
-Pequeno, simples e descomplicado. O router é um componentes de rotas PHP com abstração para MVC. Preparado com verbos
-RESTfull (GET, POST, PUT, PATCH e DELETE), trabalha em sua própria camada de forma isolada e pode ser integrado sem
-segredos a sua aplicação.
+This project is a modern fork of the original CoffeeCode Router. Credits to the initial version by Robson V. Leite and UpInside (see Credits). This fork evolves the design with reliability, security, and developer experience in mind, while preserving compatibility.
 
-## About CoffeeCode
+## Highlights
 
-###### CoffeeCode is a set of small and optimized PHP components for common tasks. Held by Robson V. Leite and the UpInside team. With them you perform routine tasks with fewer lines, writing less and doing much more.
-
-CoffeeCode é um conjunto de pequenos e otimizados componentes PHP para tarefas comuns. Mantido por Robson V. Leite e a
-equipe UpInside. Com eles você executa tarefas rotineiras com poucas linhas, escrevendo menos e fazendo muito mais.
-
-### Highlights
-
-- Router class with all RESTful verbs (Classe router com todos os verbos RESTful)
-- Optimized dispatch with total decision control (Despacho otimizado com controle total de decisões)
-- Requesting Spoofing for Local Verbalization (Falsificador (Spoofing) de requisição para verbalização local)
-- It's very simple to create routes for your application or API (É muito simples criar rotas para sua aplicação ou API)
-- Trigger and data carrier for the controller (Gatilho e transportador de dados para o controloador)
-- Composer ready and PSR-2 compliant (Pronto para o composer e compatível com PSR-2)
+- Autonomous routing (no rewrite rules required), still compatible with ?route= if rewrites exist
+- HTTP verbs: GET, POST, PUT, PATCH, DELETE, with HEAD/OPTIONS support
+- 405 Method Not Allowed with Allow header when path matches other methods
+- Route constraints, e.g. `/user/{id:\d+}` and `/post/{slug:[a-z0-9-]+}`
+- Middleware chaining with class middlewares
+- Secure assets serving: ETag/Last‑Modified/Cache‑Control, HEAD, byte‑range (206), root‑anchored realpath
+- Assets hardening: allowlist extensions and symlink policy control
+- Global helpers (router_auto, router_url, router_json, …)
+- CLI route lister (vendor/bin/list-routes)
+- Backward compatibility with original usage patterns
 
 ## Installation
 
-Router is available via Composer:
+Via Composer (recommended):
 
 ```bash
-"coffeecode/router": "2.0.*"
-```
-
-or run
-
-```bash
-composer require coffeecode/router
-```
-
-## Documentation
-
-###### For details on how to use the router, see the sample folder with details in the component directory. To use the router you need to redirect your route routing navigation (index.php) where all traffic must be handled. The example below shows how:
-
-Para mais detalhes sobre como usar o router, veja a pasta de exemplo com detalhes no diretório do componente. Para usar
-o router é preciso redirecionar sua navegação para o arquivo raiz de rotas (index.php) onde todo o tráfego deve ser
-tratado. O exemplo abaixo mostra como:
-
-#### Apache
-
-```apacheconfig
-RewriteEngine On
-#Options All -Indexes
-
-## ROUTER WWW Redirect.
-#RewriteCond %{HTTP_HOST} !^www\. [NC]
-#RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-## ROUTER HTTPS Redirect
-#RewriteCond %{HTTP:X-Forwarded-Proto} !https
-#RewriteCond %{HTTPS} off
-#RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# ROUTER URL Rewrite
-RewriteCond %{SCRIPT_FILENAME} !-f
-RewriteCond %{SCRIPT_FILENAME} !-d
-RewriteRule ^(.*)$ index.php?route=/$1 [L,QSA]
-```
-
-#### Nginx
-
-````nginxconfig
-location / {
-  if ($script_filename !~ "-f"){
-    rewrite ^(.*)$ /index.php?route=/$1 break;
+// In composer.json add:
+{
+  "repositories": [
+    {"type": "vcs", "url": "https://github.com/HellFiveOsborn/router"}
+  ],
+  "require": {
+    "hellfiveosborn/router": "dev-master"
   }
 }
-````
+composer update
+```
 
-##### Routes
+PHP requirement: >= 8.0
+
+## Quick Start (Autonomous mode)
+
+The router resolves the path directly from REQUEST_URI (and honors SCRIPT_NAME, project base path, proxies like X-Forwarded-Prefix). No rewrite rules are needed. If ?route= is present (Apache/Nginx), it will be used for compatibility.
+
+Minimal front controller:
 
 ```php
 <?php
 
+require __DIR__ . "/vendor/autoload.php";
+
 use CoffeeCode\Router\Router;
 
-$router = new Router("https://www.youdomain.com");
+// Create router with auto-detected base URL
+$router = Router::auto();
 
-/**
- * routes
- * The controller must be in the namespace Test\Controller
- * this produces routes for route, route/$id, route/{$id}/profile, etc.
- */
-$router->namespace("Test");
+// Simple route
+$router->get('/', function () {
+    echo "Hello from Router";
+});
 
-$router->get("/route", "Controller:method");
-$router->post("/route/{id}", "Controller:method");
-$router->put("/route/{id}/profile", "Controller:method");
-$router->patch("/route/{id}/profile/{photo}", "Controller:method");
-$router->delete("/route/{id}", "Controller:method");
-
-/**
- * group by routes and namespace
- * this produces routes for /admin/route and /admin/route/$id
- * The controller must be in the namespace Dash\Controller
- */
-$router->group("admin")->namespace("Dash");
-
-$router->get("/route", "Controller:method");
-$router->post("/route/{id}", "Controller:method");
-
-/**
- * sub group
- */
-$router->group("admin/support");
-
-$router->get("/tickets", "Controller:method");
-$router->post("/ticket/{id}", "Controller:method");
-
-/**
- * Group Error
- * This monitors all Router errors. Are they: 400 Bad Request, 404 Not Found, 405 Method Not Allowed and 501 Not Implemented
- */
-$router->group("error")->namespace("Test");
-$router->get("/{errcode}", "Coffee:notFound");
-
-/**
- * This method executes the routes
- */
+// Execute
 $router->dispatch();
 
-/*
- * Redirect all errors
- */
+// Error handling (404, 405, 501, 400)
+if ($router->error()) {
+    http_response_code($router->error());
+    echo "Error: " . $router->error();
+}
+```
+
+Local development (PHP built-in server):
+
+```bash
+php -S 0.0.0.0:8000 -t . index.php
+```
+
+Apache/Nginx (optional): existing rewrite snippets continue to work; when `?route=` is present, the router honors it.
+
+### Specifying a custom base URL (domain and/or subpath)
+
+If you prefer to explicitly set the base URL (e.g., for fixed domain, subdomain, or subpath deployments), instantiate the router with your URL. The router will normalize and route correctly in both cases:
+
+```php
+<?php
+
+require __DIR__ . "/vendor/autoload.php";
+
+use CoffeeCode\Router\Router;
+
+// 1) Domain or subdomain
+$router = new Router('https://api.example.com');
+
+// 2) Domain with subpath (application mounted at /myapp)
+$router = new Router('https://example.com/myapp');
+
+// Routes work the same way
+$router->get('/', fn () => print 'Home');
+$router->get('/health', fn () => print 'OK');
+
+// Execute
+$router->dispatch();
+
+if ($router->error()) {
+    http_response_code($router->error());
+    echo "Error: " . $router->error();
+}
+```
+
+Notes:
+- Subpaths are handled internally: [Dispatch.resolvePath()](src/Dispatch.php:132) removes the project base path so your routes remain clean (e.g., `$router->get('/health', ...)` works for `https://example.com/myapp/health`).
+- Behind proxies/load balancers, prefer [Router.auto()](src/Router.php:62) (which honors `X-Forwarded-*`) or set `--base` in tooling/CLI (see the CLI section).
+- You may also externalize the base URL, e.g. via ENV:
+  ```php
+  $base = getenv('APP_URL') ?: Router::autoBaseUrl();
+  $router = new Router(rtrim($base, '/'));
+  ```
+### Helpers (autoloaded)
+
+Global helpers are available to reduce boilerplate:
+
+```php
+// Create Router automatically
+$router = router_auto();
+
+// URLs
+$base = router_base_url();         // https://host/subapp
+echo router_url('docs');           // https://host/subapp/docs
+echo router_asset('css/app.css');  // https://host/subapp/css/app.css
+
+// Request info
+if (router_is_method('POST')) { /* ... */ }
+$method = router_request_method();
+$path   = router_request_path();
+
+// Responses
+router_json(['status' => 'ok'], 200);
+// router_redirect('/login', 302);
+```
+
+## Routes
+
+```php
+use CoffeeCode\Router\Router;
+
+$router = Router::auto();
+
+// Namespaces and groups
+$router->namespace('App');          // Controllers in App namespace
+
+// Simple routes
+$router->get('/route', 'Controller:method');
+$router->post('/route/{id}', 'Controller:method');
+
+// Constraints: digits and slug
+$router->get('/user/{id:\d+}', 'UserController:show');
+$router->get('/post/{slug:[a-z0-9-]+}', 'PostController:show');
+
+// Groups
+$router->group('admin')->namespace('Dash');
+$router->get('/route', 'Controller:method');
+$router->post('/route/{id}', 'Controller:method');
+
+// Error group (example)
+$router->group('error')->namespace('App');
+$router->get('/{errcode}', 'ErrorController:notFound');
+
+// Execute
+$router->dispatch();
+
 if ($router->error()) {
     $router->redirect("/error/{$router->error()}");
 }
 ```
 
-##### Named
+### Named Routes
 
 ```php
-<?php
+$router->namespace('App')->group('name');
 
-use CoffeeCode\Router\Router;
+$router->get('/', 'Name:home', 'name.home');
+$router->get('/hello', 'Name:hello', 'name.hello');
+$router->get('/redirect', 'Name:redirect', 'name.redirect');
 
-$router = new Router("https://www.youdomain.com");
-
-/**
- * routes
- * The controller must be in the namespace Test\Controller
- */
-$router->namespace("Test")->group("name");
-
-$router->get("/", "Name:home", "name.home");
-$router->get("/hello", "Name:hello", "name.hello");
-$router->get("/redirect", "Name:redirect", "name.redirect");
-
-/**
- * This method executes the routes
- */
-$router->dispatch();
-
-/*
- * Redirect all errors
- */
-if ($router->error()) {
-    $router->redirect("name.hello");
-}
+// Generate URL by name
+$url = $router->route('name.hello');                      // absolute URL
+$url = $router->route('name.redirect', ['id' => 42]);     // with params
 ```
 
-###### Named Controller Example
+### Middleware
 
 ```php
-<?php
+// single
+$router->get('/edit/{id}', 'Coffee:edit', middleware: \Http\Guest::class);
 
-class Name
-{
-    public function __construct($router)
-    {
-        $this->router = $router;
-    }
+// multiple
+$router->get('/logged', 'Coffee:logged', middleware: [\Http\Guest::class, \Http\Group::class]);
 
-    public function home(): void
-    {
-        echo "<h1>Home</h1>";
-        echo "<p>", $this->router->route("name.home"), "</p>";
-        echo "<p>", $this->router->route("name.hello"), "</p>";
-        echo "<p>", $this->router->route("name.redirect"), "</p>";
-    }
-
-    public function redirect(): void
-    {
-        $this->router->redirect("name.hello");
-    }
-}
+// middleware group
+$router->group('name', \Http\Guest::class);
+$router->get('/', 'Name:home', 'name.home');
 ```
 
-###### Named Params
+Middleware classes must implement a `handle(Router $router): bool` method and return true to continue or false to stop.
 
-````php
-<?php
+### Form Spoofing
 
-use CoffeeCode\Router\Router;
-
-$router = new Router("https://www.youdomain.com");
-
-$this->router->route("name.params", [
-    "category" => 22,
-    "page" => 2
-]);
-
-//result
-//https://www.youdomain.com/name/params/22/page/2
-
-$this->router->route("name.params", [
-    "category" => 22,
-    "page" => 2,
-    "argument1" => "most filter",
-    "argument2" => "most search"
-]);
-
-//result
-//https://www.youdomain.com/name/params/22/page/2?argument1=most+filter&argument2=most+search
-````
-
-##### Callable
-
-```php
-<?php
-
-use CoffeeCode\Router\Router;
-
-$router = new Router("https://www.youdomain.com");
-
-/**
- * GET httpMethod
- */
-$router->get("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>GET :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
-
-/**
- * GET httpMethod and Route
- */
- $router->get("/", function ($data, Router $route) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>GET :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-    var_dump($route->current());
-});
-
-/**
- * POST httpMethod
- */
-$router->post("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>POST :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
-
-/**
- * PUT spoofing and httpMethod
- */
-$router->put("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>PUT :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
-
-/**
- * PATCH spoofing and httpMethod
- */
-$router->patch("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>PATCH :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
-
-/**
- * DELETE spoofing and httpMethod
- */
-$router->delete("/", function ($data) {
-    $data = ["realHttp" => $_SERVER["REQUEST_METHOD"]] + $data;
-    echo "<h1>DELETE :: Spoofing</h1>", "<pre>", print_r($data, true), "</pre>";
-});
-
-$router->dispatch();
-```
-
-##### Simple Middleware
-
-```php
-<?php
-
-use CoffeeCode\Router\Router;
-
-$router = new Router("https://www.youdomain.com");
-
-//simple
-$router->get("/edit/{id}", "Coffee:edit", middleware: \Http\Guest::class);
-$router->get("/denied", "Coffee:denied", "coffe.denied", \Http\Group::class);
-
-//multiple
-$router->get("/logado", "Coffee:logged", middleware: [\Http\Guest::class, \Http\Group::class]);
-
-//callable
-$router->get("/call", function ($data, Router $router){
-    //code here
-}, middleware: \Http\Guest::class);
-```
-
-##### Simple Middleware Group
-
-```php
-<?php
-
-use CoffeeCode\Router\Router;
-
-$router = new Router("https://www.youdomain.com");
-
-//group single or multiple
-$router->group("name", \Http\Guest::class);
-$router->get("/", "Name:home", "name.home");
-$router->get("/hello", "Name:hello", "name.hello");
-$router->get("/redirect", "Name:redirect", "name.redirect");
-```
-
-##### Simple Middleware Class Example
-
-```php
-<?php
-
-namespace Http;
-
-use CoffeeCode\Router\Router;
-
-class User
-{
-    public function handle(Router $router): bool
-    {
-        $user = true;
-        if ($user) {
-            var_dump($router->current());
-            return true;
-        }
-        return false;
-    }
-}
-```
-
-##### Form Spoofing
-
-###### This example shows how to access the routes (PUT, PATCH, DELETE) from the application. You can see more details in the sample folder. From an attention to the _method field, it can be of the hidden type.
-
-Esse exemplo mostra como acessar as rotas (PUT, PATCH, DELETE) a partir da aplicação. Você pode ver mais detalhes na
-pasta de exemplo. De uma atenção para o campo _method, ele pode ser do tipo hidden.
+PUT, PATCH, DELETE via POST using field `_method` are supported. The router also honors `X-HTTP-Method-Override`.
 
 ```html
-
 <form action="" method="POST">
-    <select name="_method">
-        <option value="POST">POST</option>
-        <option value="PUT">PUT</option>
-        <option value="PATCH">PATCH</option>
-        <option value="DELETE">DELETE</option>
-    </select>
-
-    <input type="text" name="first_name" value="Robson"/>
-    <input type="text" name="last_name" value="Leite"/>
-    <input type="text" name="email" value="cursos@upinside.com.br"/>
-
-    <button>CoffeeCode</button>
+  <select name="_method">
+    <option>POST</option>
+    <option>PUT</option>
+    <option>PATCH</option>
+    <option>DELETE</option>
+  </select>
+  <button>Submit</button>
 </form>
 ```
 
-##### PHP cURL example
+## Serving Static Assets (secure)
 
 ```php
-<?php
+$router = Router::auto();
 
-$curl = curl_init();
+$router->setAssets(__DIR__ . '/public')->setCache(3600); // 1h cache
+$router->setAssetAllowExtensions(['css','js','png','jpg']); // allowlist
+$router->setAssetFollowSymlinks(false); // default false
 
-curl_setopt_array($curl, array(
-  CURLOPT_URL => "http://localhost/coffeecode/router/example/spoofing/",
-  CURLOPT_RETURNTRANSFER => true,
-  CURLOPT_ENCODING => "",
-  CURLOPT_MAXREDIRS => 10,
-  CURLOPT_TIMEOUT => 30,
-  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-  CURLOPT_CUSTOMREQUEST => "PUT",
-  CURLOPT_POSTFIELDS => "first_name=Robson&last_name=Leite&email=cursos%40upinside.com.br",
-  CURLOPT_HTTPHEADER => array(
-    "Cache-Control: no-cache",
-    "Content-Type: application/x-www-form-urlencoded"
-  ),
-));
-
-$response = curl_exec($curl);
-$err = curl_error($curl);
-
-curl_close($curl);
-
-if ($err) {
-  echo "cURL Error #:" . $err;
-} else {
-  echo $response;
-}
+// Now requests for /style.css, /app.js under public/ are served:
+// - ETag/Last-Modified caching
+// - Cache-Control, 304 Not Modified
+// - HEAD support (headers only)
+// - Byte-range (206 Partial Content)
 ```
 
-## Contributing
+## HEAD, OPTIONS, 405
 
-Please see [CONTRIBUTING](https://github.com/robsonvleite/router/blob/master/CONTRIBUTING.md) for details.
+- HEAD automatically supported (handlers execute with suppressed body; assets send headers only)
+- OPTIONS auto-responds with `Allow` header for matching resource
+- 405 Method Not Allowed returned when path exists for other methods; `Allow` header lists supported verbs
 
-## Support
+## CLI – List Routes
 
-###### Security: If you discover any security related issues, please email cursos@upinside.com.br instead of using the issue tracker.
+A simple CLI tool to inspect routes:
 
-Se você descobrir algum problema relacionado à segurança, envie um e-mail para cursos@upinside.com.br em vez de usar o
-rastreador de problemas.
+```bash
+# if installed as dependency:
+vendor/bin/list-routes --bootstrap=example/cli/routes.php --format=table
 
-Thank you
+# standalone from repo:
+php bin/list-routes --bootstrap=example/cli/routes.php --format=json
+```
+
+Options:
+- `--bootstrap=FILE` file that registers routes (uses provided `$router` variable or returns Router)
+- `--base=URL` override detected base (useful in CLI)
+- `--format=table|json` output format
+
+Example bootstrap is available at `example/cli/routes.php`.
+
+## Examples
+
+We include production-ready examples you can run without rewrites:
+
+```bash
+# Front unificado com exemplos
+php -S 0.0.0.0:8000 -t example example/index.php
+```
+
+- API: `/api/` (JSON, constraints)
+- Webhook: `/webhook/` (POST + demo HMAC)
+- Assets: `/assets/` (serving CSS/JS via Router)
+- Health: `/health`
+
+## Testing
+
+Pest is configured with a comprehensive unit/integration suite. See TESTING.md for details.
+
+```bash
+composer install
+./vendor/bin/pest
+```
 
 ## Credits
 
-- [Robson V. Leite](https://github.com/robsonvleite) (Developer)
-- [UpInside Treinamentos](https://github.com/upinside) (Team)
-- [All Contributors](https://github.com/robsonvleite/router/contributors) (This Rock)
+- Original Router: CoffeeCode Router by [Robson V. Leite](https://github.com/robsonvleite) and [UpInside](https://github.com/upinside)
+- This fork: HellFiveOsborn
+
+## Author & Support
+
+- Author: HellFiveOsborn — anonimo@mail.com
+- Lightning: cuttinggate97@walletofsatoshi.com
+- GitHub: https://github.com/HellFiveOsborn/router
+- Issues: https://github.com/HellFiveOsborn/router/issues
 
 ## License
 
-The MIT License (MIT). Please see [License File](https://github.com/robsonvleite/router/blob/master/LICENSE) for more
-information.
+MIT. See [LICENSE](LICENSE).

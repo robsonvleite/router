@@ -4,7 +4,10 @@ require dirname(__DIR__, 2) . "/vendor/autoload.php";
 
 use CoffeeCode\Router\Router;
 
-define("BASE", "https://www.localhost/coffeecode/router/exemple/controller");
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+define('BASE', $scheme . '://' . $host . ($basePath ?: ''));
 $router = new Router(BASE);
 
 /**

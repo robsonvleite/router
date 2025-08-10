@@ -19,42 +19,54 @@ trait RouterTrait
         string $method,
         string $route,
         callable|string $handler,
-        string $name = null,
-        array|string $middleware = null
+        ?string $name = null,
+        array|string|null $middleware = null
     ): void {
         $route = rtrim($route, "/");
-
-        $removeGroupFromPath = $this->group ? str_replace($this->group, "", $this->path) : $this->path;
-        $pathAssoc = trim($removeGroupFromPath, "/");
-        $routeAssoc = trim($route, "/");
-
-        preg_match_all("~\{\s* ([a-zA-Z_][a-zA-Z0-9_-]*) \}~x", $routeAssoc, $keys, PREG_SET_ORDER);
-        $routeDiff = array_values(array_diff_assoc(explode("/", $pathAssoc), explode("/", $routeAssoc)));
-
-        $this->formSpoofing();
-        $offset = 0;
-        foreach ($keys as $key) {
-            $this->data[$key[1]] = ($routeDiff[$offset++] ?? null);
+        if ($route === "") {
+            $route = "/";
         }
 
-        $route = (!$this->group ? $route : "/{$this->group}{$route}");
-        $data = $this->data;
+        // Apply group prefix to the route for matching and storage
+        $fullRoute = (!$this->group ? $route : "/{$this->group}{$route}");
+        // Normalize double slashes and ensure root stays "/"
+        $fullRoute = preg_replace('~//+~', '/', $fullRoute);
+        if ($fullRoute === "") {
+            $fullRoute = "/";
+        }
+
+        // Extract parameter names and optional constraints {name:pattern}
+        preg_match_all('~{([a-zA-Z_][a-zA-Z0-9_-]*)(?::([^}]+))?}~', $fullRoute, $tokens, PREG_SET_ORDER);
+        $paramNames = [];
+        $regex = preg_replace_callback(
+            '~{([a-zA-Z_][a-zA-Z0-9_-]*)(?::([^}]+))?}~',
+            static function ($m) use (&$paramNames) {
+                $paramNames[] = $m[1];
+                $pattern = isset($m[2]) && $m[2] !== '' ? $m[2] : '[^/]+';
+                return '(' . $pattern . ')';
+            },
+            $fullRoute
+        );
+
+        // Prepare route payload (data will be resolved at dispatch time)
         $namespace = $this->namespace;
-        $middleware = $middleware ?? (!empty($this->middleware[$this->group]) ? $this->middleware[$this->group] : null);
-        $router = function () use ($method, $handler, $data, $route, $name, $namespace, $middleware) {
+        $resolvedMiddleware = $middleware ?? (!empty($this->middleware[$this->group]) ? $this->middleware[$this->group] : null);
+
+        $router = function () use ($method, $handler, $fullRoute, $name, $namespace, $resolvedMiddleware, $paramNames) {
             return [
-                "route" => $route,
+                "route" => $fullRoute,
                 "name" => $name,
                 "method" => $method,
-                "middlewares" => $middleware,
+                "middlewares" => $resolvedMiddleware,
                 "handler" => $this->handler($handler, $namespace),
                 "action" => $this->action($handler),
-                "data" => $data
+                "data" => null,
+                "paramNames" => $paramNames
             ];
         };
 
-        $route = preg_replace('~{([^}]*)}~', "([^/]+)", $route);
-        $this->routes[$method][$route] = $router();
+        // Store compiled regex as key so dispatch can match quickly
+        $this->routes[$method][$regex] = $router();
     }
 
     /**
@@ -62,7 +74,8 @@ trait RouterTrait
      */
     protected function formSpoofing(): void
     {
-        $post = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+        // Usa $_POST diretamente se filter_input_array retornar null (útil para testes)
+        $post = filter_input_array(INPUT_POST, FILTER_DEFAULT) ?? $_POST ?? [];
 
         if (!empty($post['_method']) && in_array($post['_method'], ["PUT", "PATCH", "DELETE"])) {
             $this->httpMethod = $post['_method'];
@@ -73,9 +86,11 @@ trait RouterTrait
         }
 
         if ($this->httpMethod == "POST") {
-            $this->data = filter_input_array(INPUT_POST, FILTER_DEFAULT);
+            $this->data = filter_input_array(INPUT_POST, FILTER_DEFAULT) ?? $_POST ?? [];
 
-            unset($this->data["_method"]);
+            if (isset($this->data["_method"])) {
+                unset($this->data["_method"]);
+            }
             return;
         }
 
@@ -83,7 +98,9 @@ trait RouterTrait
             parse_str(file_get_contents('php://input', false, null, 0, $_SERVER['CONTENT_LENGTH']), $putPatch);
             $this->data = $putPatch;
 
-            unset($this->data["_method"]);
+            if (isset($this->data["_method"])) {
+                unset($this->data["_method"]);
+            }
             return;
         }
 
@@ -184,7 +201,7 @@ trait RouterTrait
      * @param array|null $data
      * @return string|null
      */
-    private function treat(array $route_item, array $data = null): ?string
+    private function treat(array $route_item, ?array $data = null): ?string
     {
         $route = $route_item["route"];
         if (!empty($data)) {
@@ -208,7 +225,7 @@ trait RouterTrait
      * @param array|null $params
      * @return string
      */
-    private function process(string $route, array $arguments, array $params = null): string
+    private function process(string $route, array $arguments, ?array $params = null): string
     {
         $params = (!empty($params) ? "?" . http_build_query($params) : null);
         return str_replace(array_keys($arguments), array_values($arguments), $route) . "{$params}";

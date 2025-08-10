@@ -15,7 +15,10 @@ require __DIR__ . "/Http/Group.php";
 use CoffeeCode\Router\Router;
 use Http\Middlewares as Middleware;
 
-const BASE = "https://www.localhost/coffeecode/router/exemple/controller";
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+define('BASE', $scheme . '://' . $host . ($basePath ?: ''));
 $router = new Router(BASE);
 
 /**
@@ -46,7 +49,7 @@ $router->group("name");
 
 $router->get("/", "Name:home", "name.home");
 $router->get("/hello", "Name:hello", "name.hello", \Http\Guest::class);
-$router->get("/params/{category}/page/{page}", "name:params", "name.params");
+$router->get("/params/{category}/page/{page}", "Name:params", "name.params");
 $router->get("/redirect", "Name:redirect", "name.redirect", Middleware::GUEST);
 $router->get("/redirect/{category}/{page}", "name:redirect", "name.redirect.params");
 

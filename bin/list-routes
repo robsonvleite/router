@@ -1,0 +1,185 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+/**
+ * CoffeeCode Router - Route Lister
+ *
+ * Usage:
+ *   vendor/bin/list-routes --bootstrap=path/to/routes.php [--base=https://host/subapp] [--format=table|json]
+ *
+ * Notes:
+ * - The --bootstrap file SHOULD register routes on the provided $router variable or RETURN a Router instance.
+ * - Any output produced by the bootstrap is discarded (buffered) to avoid side effects.
+ */
+
+use CoffeeCode\Router\Router;
+
+// Try to load project autoloader (Composer vendor/)
+$autoloadCandidates = [
+    // running from package repo
+    dirname(__DIR__) . '/vendor/autoload.php',
+    // running from vendor package dir (symlinked bin)
+    dirname(__DIR__, 3) . '/autoload.php',
+    // common path when installed as a dependency
+    __DIR__ . '/../../autoload.php',
+];
+$autoloadLoaded = false;
+foreach ($autoloadCandidates as $autopath) {
+    if (is_file($autopath)) {
+        require $autopath;
+        $autoloadLoaded = true;
+        break;
+    }
+}
+if (!$autoloadLoaded) {
+    fwrite(STDERR, "Unable to locate Composer autoload.php\n");
+    exit(1);
+}
+
+// Simple CLI args parsing
+$opts = [
+    'bootstrap' => null,
+    'format' => 'table',
+    'base' => null,
+];
+foreach ($argv as $arg) {
+    if (preg_match('~^--bootstrap=(.+)$~', $arg, $m)) {
+        $opts['bootstrap'] = $m[1];
+    } elseif (preg_match('~^--format=(json|table)$~i', $arg, $m)) {
+        $opts['format'] = strtolower($m[1]);
+    } elseif (preg_match('~^--base=(.+)$~', $arg, $m)) {
+        $opts['base'] = $m[1];
+    } elseif (in_array($arg, ['-h', '--help'], true)) {
+        echo "CoffeeCode Router - Route Lister\n";
+        echo "Usage:\n";
+        echo "  vendor/bin/list-routes --bootstrap=path/to/routes.php [--base=https://host/subapp] [--format=table|json]\n\n";
+        echo "Options:\n";
+        echo "  --bootstrap=FILE   PHP file that registers routes. It should use the provided \$router variable\n";
+        echo "                     or return an instance of CoffeeCode\\Router\\Router.\n";
+        echo "  --base=URL         Override detected base URL for the Router instance.\n";
+        echo "  --format=table|json  Output format (default: table).\n";
+        exit(0);
+    }
+}
+
+// Build Router
+if (!empty($opts['base'])) {
+    $base = $opts['base'];
+} else {
+    // In CLI, there is no HTTP context; default to a sane base.
+    // Users can override with --base if needed.
+    $base = (PHP_SAPI === 'cli') ? 'http://localhost' : Router::autoBaseUrl();
+}
+$router = new Router($base);
+
+// Load bootstrap (optional)
+if ($opts['bootstrap']) {
+    if (!is_file($opts['bootstrap'])) {
+        fwrite(STDERR, "Bootstrap file not found: {$opts['bootstrap']}\n");
+        exit(2);
+    }
+
+    // Provide $router in scope for bootstrap to use
+    $bootstrapReturn = null;
+    ob_start();
+    try {
+        /** @noinspection PhpUnusedLocalVariableInspection */
+        $bootstrapReturn = include $opts['bootstrap'];
+    } catch (Throwable $e) {
+        ob_end_clean();
+        fwrite(STDERR, "Error including bootstrap: " . $e->getMessage() . "\n");
+        exit(3);
+    }
+    ob_end_clean();
+
+    // If file returned a Router instance, use it
+    if ($bootstrapReturn instanceof Router) {
+        $router = $bootstrapReturn;
+    }
+}
+
+// Collect routes
+$routesAll = $router->__debugInfo() ?? [];
+$export = [];
+
+// Normalize for output
+foreach ($routesAll as $method => $items) {
+    foreach ($items as $pattern => $def) {
+        $export[] = [
+            'method' => $def['method'] ?? $method,
+            'route' => $def['route'] ?? $pattern, // original path if available
+            'name' => $def['name'] ?? null,
+            'handler' => is_string($def['handler'] ?? null) ? ($def['handler'] ?? null) : (is_callable($def['handler'] ?? null) ? 'callable' : null),
+            'action' => $def['action'] ?? null,
+            'middlewares' => (function ($mw) {
+                if ($mw === null) {
+                    return [];
+                }
+                return is_array($mw) ? array_values($mw) : [$mw];
+            })($def['middlewares'] ?? null),
+        ];
+    }
+}
+
+// Output
+if ($opts['format'] === 'json') {
+    echo json_encode([
+        'base' => $base,
+        'count' => count($export),
+        'routes' => $export,
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+    exit(0);
+}
+
+// Table output
+// Compute column widths
+$headers = ['METHOD', 'ROUTE', 'NAME', 'HANDLER', 'ACTION', 'MIDDLEWARES'];
+$rows = [];
+$widths = array_fill_keys($headers, 0);
+$rows[] = $headers;
+foreach ($export as $r) {
+    $row = [
+        $r['method'],
+        $r['route'],
+        $r['name'] ?? '',
+        $r['handler'] ?? '',
+        $r['action'] ?? '',
+        implode(',', $r['middlewares'] ?? []),
+    ];
+    $rows[] = $row;
+}
+foreach ($rows as $row) {
+    foreach ($headers as $i => $h) {
+        $widths[$h] = max($widths[$h], strlen((string)$row[$i]));
+    }
+}
+
+// Print with padding
+$sep = function () use ($headers, $widths): void {
+    $line = '+';
+    foreach ($headers as $h) {
+        $line .= str_repeat('-', $widths[$h] + 2) . '+';
+    }
+    echo $line . PHP_EOL;
+};
+
+$printRow = function (array $row) use ($headers, $widths): void {
+    $line = '|';
+    foreach ($headers as $i => $h) {
+        $cell = (string)$row[$i];
+        $pad = $widths[$h] - strlen($cell);
+        $line .= ' ' . $cell . str_repeat(' ', $pad) . ' |';
+    }
+    echo $line . PHP_EOL;
+};
+
+$sep();
+$printRow($rows[0]);
+$sep();
+for ($i = 1; $i < count($rows); $i++) {
+    $printRow($rows[$i]);
+}
+$sep();
+
+echo "Base: {$base} | Total routes: " . count($export) . PHP_EOL;

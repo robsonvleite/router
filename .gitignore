@@ -1,0 +1,61 @@
+# Composer
+/vendor/
+composer.phar
+composer.lock
+
+# PHPUnit & Pest
+.phpunit.cache/
+.phpunit.result.cache
+phpunit.xml.bak
+coverage/
+coverage-html/
+coverage.xml
+coverage.txt
+junit.xml
+
+# IDE & Editors
+.vscode/
+.idea/
+.idx/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Cache & Temporary Files
+*.cache
+*.tmp
+*.temp
+/tmp/
+/temp/
+
+# Environment Files
+.env
+.env.local
+.env.*.local
+
+# Build & Distribution
+/build/
+/dist/
+
+# Node.js (se houver assets frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# PHP specific
+*.php~
+*.php.bak

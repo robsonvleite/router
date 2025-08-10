@@ -1,28 +1,67 @@
 {
-  "name": "coffeecode/router",
-  "description": "A classic CoffeeCode Router is easy, fast and extremely uncomplicated. Create and manage your routes in minutes!",
+  "name": "hellfiveosborn/router",
+  "description": "Next‑gen PHP Router (fork of CoffeeCode Router): autonomous, secure asset serving, HEAD/OPTIONS/405, constraints, CLI tools and DX helpers.",
   "keywords": [
-    "CoffeeCode",
-    "UpInside",
     "Router",
-    "Route",
-    "Routes"
+    "Routing",
+    "CoffeeCode",
+    "HTTP",
+    "Middleware",
+    "Autonomous",
+    "Assets",
+    "Constraints",
+    "CLI"
   ],
-  "homepage": "http://www.upinside.com.br",
+  "homepage": "https://github.com/HellFiveOsborn/router",
   "license": "MIT",
   "authors": [
     {
+      "name": "HellFiveOsborn",
+      "email": "anonimo@mail.com",
+      "role": "Developer"
+    },
+    {
       "name": "Robson V. Leite",
       "email": "cursos@upinside.com.br",
-      "role": "Developer"
+      "role": "Original Author (CoffeeCode Router)"
+    }
+  ],
+  "support": {
+    "email": "anonimo@mail.com",
+    "issues": "https://github.com/HellFiveOsborn/router/issues",
+    "source": "https://github.com/HellFiveOsborn/router"
+  },
+  "funding": [
+    {
+      "type": "custom",
+      "url": "lightning:cuttinggate97@walletofsatoshi.com"
     }
   ],
   "require": {
     "php": ">=8.0"
   },
+  "require-dev": {
+    "pestphp/pest": "^2.0"
+  },
   "autoload": {
     "psr-4": {
       "CoffeeCode\\Router\\": "src"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "CoffeeCode\\Router\\Tests\\": "tests/"
+    }
+  },
+  "bin": [
+    "bin/list-routes"
+  ],
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
     }
   }
 }
